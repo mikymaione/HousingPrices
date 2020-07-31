@@ -6,21 +6,16 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# HousingPrices
-# Implement from scratch the ridge regression algorithm for regression with square loss.
-# Apply the algorithm to the prediction of the label medianHouseValue in this dataset.
-# Study the dependence of the cross-validated risk estimate on the parameter alpha of ridge regression.
-# Try using PCA to improve the risk estimate.
-# Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
+# Ridge regression algorithm for regression with square loss.
 
-import DatasetReader
-import RidgeRegression
+class RidgeRegression:
 
-print("HousingPrices Project")
-print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
+    def __init__(self, α, S):
+        self.α = α
+        self.S = S
 
-dr = DatasetReader.DatasetReader()
-S = dr.Read('cal-housing.csv')
+    def Elaborate(self):
+        medianHouseValue = 0
 
-ridgeRegression = RidgeRegression.RidgeRegression(0.5, S)
-ridgeRegression.Elaborate()
+        for e in self.S:
+            medianHouseValue += 1
