@@ -8,14 +8,14 @@
 
 # Ridge regression algorithm for regression with square loss.
 
+import numpy as np
+
+
 class RidgeRegression:
 
-    def __init__(self, α, S):
-        self.α = α
-        self.S = S
-
-    def Elaborate(self):
+    def Elaborate(self, α, S):
         medianHouseValue = 0
+        wˆ = 1
 
         for e in self.S:
             medianHouseValue += 1

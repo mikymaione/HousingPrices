@@ -19,20 +19,66 @@
 # 10. oceanProximity: Location of the house w.r.t ocean/sea
 #
 # Note: The dataset has an attribute with missing values and an attribute with categorical values. Find a way of handling these anomalies and justify your choice.
-
 import csv
+
 
 class DatasetReader:
 
-    def Read(self, filePath):
-        S = []
+    def NumberOfLines(self, filePath):
+        """Return number of lines of file.
+
+        Parameters
+        ----------
+        filePath : the path of the file on the disk
+
+        Returns
+        -------
+        tot : the number of lines
+        """
+        tot = 0
 
         with open(filePath) as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
 
             for row in reader:
-                S.append(row)
+                tot += 1
 
-        S.pop(0)  # remove title
+        return tot
 
-        return S
+    def Read(self, filePath, trainingPct):
+        """Read the dataset.
+
+        Parameters
+        ----------
+        filePath : the path of the file on the disk
+        trainingPct : the % of training set / test set
+
+        Returns
+        -------
+        train : the training set
+        test : the test set
+        """
+
+        assert trainingPct <= 100
+        assert trainingPct >= 0
+
+        train = []
+        test = []
+
+        tot = self.NumberOfLines(filePath)
+        x = tot * trainingPct / 100
+
+        with open(filePath) as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+
+            for row in reader:
+                x -= 1
+
+                if x > 0:
+                    train.append(row)
+                else:
+                    test.append(row)
+
+        train.pop(0)  # remove title
+
+        return train, test

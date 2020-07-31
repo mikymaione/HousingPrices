@@ -20,7 +20,7 @@ print("HousingPrices Project")
 print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
 
 dr = DatasetReader.DatasetReader()
-S = dr.Read('cal-housing.csv')
+S, T = dr.Read('cal-housing.csv', 80)
 
-ridgeRegression = RidgeRegression.RidgeRegression(0.5, S)
-ridgeRegression.Elaborate()
+ridgeRegression = RidgeRegression.RidgeRegression()
+ridgeRegression.Elaborate(0.5, S)
