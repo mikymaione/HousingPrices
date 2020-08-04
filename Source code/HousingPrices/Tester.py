@@ -6,26 +6,22 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# HousingPrices Project
-# Implement from scratch the ridge regression algorithm for regression with square loss.
-# Apply the algorithm to the prediction of the label medianHouseValue in this dataset.
-# Study the dependence of the cross-validated risk estimate on the parameter alpha of ridge regression.
-# Try using PCA to improve the risk estimate.
-# Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
+import numpy as np
 
-import DatasetReader
-import RidgeRegression
-import Tester
 
-print("HousingPrices Project")
-print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
+class Tester:
 
-dr = DatasetReader.DatasetReader()
-S, R, T, V = dr.Read('cal-housing.csv', 80)
+    def Test(self, T, R, w):
+        S = np.zeros(R.shape[0])
 
-ridgeRegression = RidgeRegression.RidgeRegression()
-# X = ridgeRegression.ridge(S, R, 0.5)
-# X = ridgeRegression.Elaborate(S, R, 0.5)
+        for i in range(0, R.shape[0]):
+            t = T[i]
+            s = np.dot(t, w)
+            S[i] = s
 
-tester = Tester.Tester()
-# tester.Test(T, V, p)
+        x = np.zeros(R.shape[0])
+
+        for i in range(0, R.shape[0]):
+            x[i] = 100 * S[i] / R[i]
+
+        return x

@@ -7,19 +7,21 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Here is a description of the attributes in the dataset:
-# 1. longitude: A measure of how far west a house is; a higher value is farther west
-# 2. latitude: A measure of how far north a house is; a higher value is farther north
-# 3. housingMedianAge: Median age of a house within a block; a lower number is a newer building
-# 4. totalRooms: Total number of rooms within a block
-# 5. totalBedrooms: Total number of bedrooms within a block
-# 6. population: Total number of people residing within a block
-# 7. households: Total number of households, a group of people residing within a home unit, for a block
-# 8. medianIncome: Median income for households within a block of houses (measured in tens of thousands of US Dollars)
-# 9. medianHouseValue: Median house value for households within a block (measured in US Dollars)
-# 10. oceanProximity: Location of the house w.r.t ocean/sea
+# 0. longitude: A measure of how far west a house is; a higher value is farther west
+# 1. latitude: A measure of how far north a house is; a higher value is farther north
+# 2. housingMedianAge: Median age of a house within a block; a lower number is a newer building
+# 3. totalRooms: Total number of rooms within a block
+# 4. totalBedrooms: Total number of bedrooms within a block
+# 5. population: Total number of people residing within a block
+# 6. households: Total number of households, a group of people residing within a home unit, for a block
+# 7. medianIncome: Median income for households within a block of houses (measured in tens of thousands of US Dollars)
+# 8. medianHouseValue: Median house value for households within a block (measured in US Dollars)
+# 9. oceanProximity: Location of the house w.r.t ocean/sea
 #
 # Note: The dataset has an attribute with missing values and an attribute with categorical values. Find a way of handling these anomalies and justify your choice.
 import csv
+import math
+import numpy as np
 
 
 class DatasetReader:
@@ -55,30 +57,62 @@ class DatasetReader:
 
         Returns
         -------
-        train : the training set
-        test : the test set
+        train_S : the training set without medianHouseValue
+        train_R : the training set medianHouseValue
+        test_S : the test set without medianHouseValue
+        test_R : the test set medianHouseValue
         """
 
         assert trainingPct <= 100
         assert trainingPct >= 0
 
-        train = []
-        test = []
+        tot = self.NumberOfLines(filePath) - 1
+        train = math.ceil(tot * trainingPct / 100)
+        test = tot - train
 
-        tot = self.NumberOfLines(filePath)
-        x = tot * trainingPct / 100
+        curr_train = -1
+        curr_test = -1
+
+        train_S = np.zeros((train, 9), dtype='f')
+        train_R = np.zeros((train, 1), dtype='f')
+        test_S = np.zeros((test, 9), dtype='f')
+        test_R = np.zeros((test, 1), dtype='f')
 
         with open(filePath) as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
+            reader = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_NONE)
+
+            next(reader)  # salta header
 
             for row in reader:
-                x -= 1
+                oceanProximity = row.pop()
+                medianHouseValue = row.pop()
 
-                if x > 0:
-                    train.append(row)
+                row.append(self.oceanProximityToNumber(oceanProximity))
+
+                for e in range(0, 9):
+                    if row[e] == '':
+                        row[e] = 0
+
+                if train > 0:
+                    curr_train += 1
+                    train_S[curr_train] = row
+                    train_R[curr_train] = medianHouseValue
                 else:
-                    test.append(row)
+                    curr_test += 1
+                    test_S[curr_test] = row
+                    test_R[curr_test] = medianHouseValue
 
-        train.pop(0)  # remove title
+                train -= 1
 
-        return train, test
+        return train_S, train_R, test_S, test_R
+
+    def oceanProximityToNumber(self, oceanProximity):
+        switcher = {
+            "ISLAND": 500,
+            "NEAR BAY": 100,
+            "NEAR OCEAN": 50,
+            "<1H OCEAN": 20,
+            "INLAND": 1,
+        }
+
+        return switcher.get(oceanProximity)
