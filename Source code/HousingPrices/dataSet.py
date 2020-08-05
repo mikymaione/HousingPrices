@@ -6,22 +6,14 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import numpy as np
+import numpy
+
+from dataclasses import dataclass
 
 
-class Tester:
-
-    def Test(self, T, R, w):
-        S = np.zeros(R.shape[0])
-
-        for i in range(0, R.shape[0]):
-            t = T[i]
-            s = np.dot(t, w)
-            S[i] = s
-
-        x = np.zeros(R.shape[0])
-
-        for i in range(0, R.shape[0]):
-            x[i] = 100 * S[i] / R[i]
-
-        return x
+@dataclass
+class DataSet:
+    x_train: numpy.ndarray
+    x_test: numpy.ndarray
+    y_train: numpy.ndarray
+    y_test: numpy.ndarray

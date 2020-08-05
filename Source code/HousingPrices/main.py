@@ -13,19 +13,28 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
-import DatasetReader
-import RidgeRegression
-import Tester
+from dataUtility import DataUtility
+from ridgeRegression import RidgeRegression
 
-print("HousingPrices Project")
-print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
+if __name__ == "__main__":
+    print("HousingPrices Project")
+    print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
+    print("")
+    print("Elaborating...")
 
-dr = DatasetReader.DatasetReader()
-S, R, T, V = dr.Read('cal-housing.csv', 80)
+    # carica i dati
+    data = DataUtility.load_data(csv_file='cal-housing.csv')
 
-ridgeRegression = RidgeRegression.RidgeRegression()
-# X = ridgeRegression.ridge(S, R, 0.5)
-# X = ridgeRegression.Elaborate(S, R, 0.5)
+    # istanzia classe per la Ridge Regression
+    ridge_regression = RidgeRegression(alpha=0.1, reg_strength=10, max_iter=1000)
 
-tester = Tester.Tester()
-# tester.Test(T, V, p)
+    # apprendi tramite Ridge Regression
+    ridge_regression.fit(x_train=data.x_train, y_train=data.y_train)
+
+    # esegui una predizione
+    w = ridge_regression.predict(x_test=data.x_test)
+
+    # calcola errore
+    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, w=w)
+
+    print(f'Mean absolute percentage error on test set: {error}%')

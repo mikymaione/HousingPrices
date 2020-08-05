@@ -6,63 +6,51 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Ridge regression algorithm for regression with square loss.
-
-import numpy as np
+import numpy
 
 
 class RidgeRegression:
+    """
+    ||w - Xw||^2_2 + alpha * ||w||2_2
+    """
 
-    def Elaborate(self, S, y, α):
-        S_t = np.transpose(S)
-        S_t_S = np.dot(S_t, S)
-        inv = np.linalg.inv(S_t_S)
-        w = np.dot(inv, S_t).dot(y)
+    def __init__(self, alpha: float, reg_strength: float, max_iter: int) -> None:
+        self.alpha = alpha
+        self.reg_strength = reg_strength
+        self.max_iter = max_iter
+        self.w: numpy.array
+        self.S: numpy.array
+        self.y_train: numpy.array
+        self.m: int
+        self.num_feats: int
 
-        return w
+    def fit(self, x_train: numpy.ndarray, y_train: numpy.ndarray) -> None:
+        self.m = x_train.shape[0]
+        self.num_feats = x_train.shape[1]
 
-    def ridge(self, S, R, α):
-        """Uses ridge regression to find a linear transformation of [S] that approximates [R]. The regularization parameter is [α].
+        self.S = numpy.append(numpy.ones(self.m).reshape(-1, 1), x_train, axis=1)
 
-        Parameters
-        ----------
-        S : array_like, shape (T, N)
-            Stimuli with T time points and N features.
-        R : array_like, shape (T, M)
-            Responses with T time points and M separate responses.
-        α : float or array_like, shape (M,)
-            Regularization parameter. Can be given as a single value (which is applied to
-            all M responses) or separate values for each response.
+        self.y_train = y_train
+        self.w = numpy.zeros(self.num_feats + 1)  # +1 for the intercept
 
-        Returns
-        -------
-        wˆ : array_like, shape (N, M)
-            Linear regression weights.
+        for _ in range(self.max_iter):
+            self.update_step()
+
+    def update_step(self) -> None:
         """
+        theta_k = theta_k - (learn_rate * J_theta_k)
+        J_theta_k = (2 / train_size) * ( ((w_hat - y_real) * x_k) + (alpha * theta_k^2))
+        """
+        w_hat = (self.w * self.S).sum(axis=1)
+        e = (w_hat - self.y_train).reshape(-1, 1)
 
-        # V* = V′
-        # UΣV* = S
-        U, Σ, V = np.linalg.svd(S, full_matrices=False)
+        j_theta = (2 / self.m) * ((e * self.S).sum(axis=0) + (self.reg_strength * self.w))
+        step = self.alpha * j_theta
 
-        # U′R
-        UR = np.dot(U.T, R)
+        self.w -= step.reshape(-1)
 
-        # Expand alpha to a collection if it's just a single value
-        α = np.ones(R.shape[0]) * α
+    def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
+        test_size = x_test.shape[0]
+        x_test = numpy.append(numpy.ones(test_size).reshape(-1, 1), x_test, axis=1)
 
-        # Compute weights for each alpha
-        α_ = np.unique(α)
-        wˆ = np.zeros((Σ.shape[0], R.shape[0]))
-
-        for a in α_:
-            selvox = np.nonzero(α == a)[0]
-
-            # awt = V′ ___Σ___ U′R
-            #          Σ² + α²
-            fra = np.diag(Σ / (Σ ** 2 + a ** 2))
-            URa = UR[:, selvox]
-
-            awt = V.T.dot(fra).dot(URa)
-            wˆ[:, selvox] = awt
-
-        return wˆ
+        return (self.w * x_test).sum(axis=1)
