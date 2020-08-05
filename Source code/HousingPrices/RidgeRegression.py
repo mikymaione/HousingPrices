@@ -12,15 +12,14 @@ import numpy
 class RidgeRegression:
 
     @staticmethod
-    def fit(alpha: float, reg_strength: float, max_iter: int, x_train: numpy.ndarray,
-            y_train: numpy.ndarray) -> numpy.ndarray:
+    def fit(alpha: float, reg_strength: float, max_iter: int, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         """
-        ||w - Xw||^2_2 + alpha * ||w||2_2
+        ||S∙w - y||² + α∙||w||²
         """
-        m = x_train.shape[0]
-        columns = x_train.shape[1]
+        m = S.shape[0]
+        columns = S.shape[1]
 
-        S = numpy.append(numpy.ones(m).reshape(-1, 1), x_train, axis=1)
+        S = numpy.append(numpy.ones(m).reshape(-1, 1), S, axis=1)
         w = numpy.zeros(columns + 1)  # +1 for the intercept
 
         for _ in range(max_iter):
@@ -29,7 +28,7 @@ class RidgeRegression:
             J_theta_k = (2 / train_size) * ( ((w_hat - y_real) * x_k) + (alpha * theta_k^2))
             """
             w_hat = (w * S).sum(axis=1)
-            e = (w_hat - y_train).reshape(-1, 1)
+            e = (w_hat - y).reshape(-1, 1)
 
             j_theta = (2 / m) * ((e * S).sum(axis=0) + (reg_strength * w))
             step = alpha * j_theta
@@ -42,7 +41,7 @@ class RidgeRegression:
     def predict(x_test: numpy.ndarray, w: numpy.ndarray) -> numpy.ndarray:
         m = x_test.shape[0]
         x_test = numpy.append(numpy.ones(m).reshape(-1, 1), x_test, axis=1)
-        
+
         y_predict = (w * x_test).sum(axis=1)
 
         return y_predict

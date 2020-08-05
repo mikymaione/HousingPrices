@@ -26,7 +26,7 @@ if __name__ == "__main__":
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
     # apprendi pesi tramite Ridge Regression
-    w = RidgeRegression.fit(alpha=0.1, reg_strength=10, max_iter=1000, x_train=data.x_train, y_train=data.y_train)
+    w = RidgeRegression.fit(alpha=0.1, reg_strength=10, max_iter=1000, S=data.x_train, y=data.y_train)
 
     # esegui una predizione
     y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
