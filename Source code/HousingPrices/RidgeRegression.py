@@ -23,10 +23,6 @@ class RidgeRegression:
         w = numpy.zeros(columns + 1)  # +1 for the intercept
 
         for _ in range(max_iter):
-            """
-            theta_k = theta_k - (learn_rate * J_theta_k)
-            J_theta_k = (2 / train_size) * ( ((w_hat - y_real) * x_k) + (alpha * theta_k^2))
-            """
             w_hat = (w * S).sum(axis=1)
             e = (w_hat - y).reshape(-1, 1)
 
