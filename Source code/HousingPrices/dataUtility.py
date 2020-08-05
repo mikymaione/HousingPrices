@@ -19,8 +19,8 @@ from dataSet import DataSet
 class DataUtility:
 
     @staticmethod
-    def mean_absolute_percentage_error(y_test: numpy.ndarray, w: numpy.ndarray):
-        abs_errors = numpy.abs((y_test - w) / y_test)
+    def mean_absolute_percentage_error(y_test: numpy.ndarray, y_predict: numpy.ndarray):
+        abs_errors = numpy.abs((y_test - y_predict) / y_test)
 
         return numpy.mean(abs_errors) * 100
 

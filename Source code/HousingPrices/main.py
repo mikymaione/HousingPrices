@@ -23,18 +23,15 @@ if __name__ == "__main__":
     print("Elaborating...")
 
     # carica i dati
-    data = DataUtility.load_data(csv_file='cal-housing.csv')
+    data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    # istanzia classe per la Ridge Regression
-    ridge_regression = RidgeRegression(alpha=0.1, reg_strength=10, max_iter=1000)
-
-    # apprendi tramite Ridge Regression
-    ridge_regression.fit(x_train=data.x_train, y_train=data.y_train)
+    # apprendi pesi tramite Ridge Regression
+    w = RidgeRegression.fit(alpha=0.1, reg_strength=10, max_iter=1000, x_train=data.x_train, y_train=data.y_train)
 
     # esegui una predizione
-    w = ridge_regression.predict(x_test=data.x_test)
+    y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
 
     # calcola errore
-    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, w=w)
+    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
 
     print(f'Mean absolute percentage error on test set: {error}%')
