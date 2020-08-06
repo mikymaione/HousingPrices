@@ -12,7 +12,33 @@ import numpy
 class RidgeRegression:
 
     @staticmethod
-    def fit(alpha: float, reg_strength: float, max_iter: int, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
+    def svd(S: numpy.ndarray, y: numpy.ndarray, alpha: float) -> numpy.ndarray:
+        y = y.reshape((16512, 1))
+        S = numpy.append(numpy.ones(S.shape[0]).reshape(-1, 1), S, axis=1)
+
+        U, Σ, Vh = numpy.linalg.svd(S, full_matrices=False)
+        UR = numpy.dot(U.T, y)
+
+        # Expand alpha to a collection if it's just a single value
+        alpha = numpy.ones(y.shape[1]) * alpha
+
+        # Normalize alpha by the LSV norm
+        norm = Σ[0]
+        normalized_alpha = alpha * norm
+
+        # Compute weights for each alpha
+        unique_alphas = numpy.unique(normalized_alpha)
+        wt = numpy.zeros((S.shape[1], y.shape[1]))
+
+        for ua in unique_alphas:
+            selvox = numpy.nonzero(normalized_alpha == ua)[0]
+            awt = Vh.T.dot(numpy.diag(Σ / (Σ ** 2 + ua ** 2))).dot(UR[:, selvox])
+            wt[:, selvox] = awt
+
+        return wt.reshape((1, 9))
+
+    @staticmethod
+    def gradient_descent(S: numpy.ndarray, y: numpy.ndarray, alpha: float) -> numpy.ndarray:
         """
         ||S∙w - y||² + α∙||w||²
         """
@@ -20,16 +46,22 @@ class RidgeRegression:
         columns = S.shape[1]
 
         S = numpy.append(numpy.ones(m).reshape(-1, 1), S, axis=1)
-        w = numpy.zeros(columns + 1)  # +1 for the intercept
+        w = numpy.zeros(columns + 1)
 
-        for _ in range(max_iter):
-            w_hat = (w * S).sum(axis=1)
-            e = (w_hat - y).reshape(-1, 1)
+        """
+        Update model weights with batch gradient descent step.
 
-            j_theta = (2 / m) * ((e * S).sum(axis=0) + (reg_strength * w))
-            step = alpha * j_theta
+        Recall, the update statement for a model weight theta_k is:
+            w_k = w_k - (alpha * J_w_k)
 
-            w -= step.reshape(-1)
+            where J_w_k = cost function
+                  J_w_k = (2 / m) * ( ((y_hat - y_real) * x_k) + (alpha * theta_k))
+        """
+        w_hat = (w * S).sum(axis=1)
+        e = (w_hat - y).reshape(-1, 1)
+
+        j_theta = (2 / m) * ((e * S).sum(axis=0) + w)
+        w = w - (alpha * j_theta).reshape(-1)
 
         return w
 

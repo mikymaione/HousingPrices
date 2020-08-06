@@ -13,8 +13,21 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
+import numpy
+
 from dataUtility import DataUtility
 from ridgeRegression import RidgeRegression
+
+
+def printPredict(title: str, alpha: float, w: numpy.ndarray) -> None:
+    # esegui una predizione
+    y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
+
+    # calcola errore
+    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
+
+    print(f'Mean absolute percentage error on test set with alpha {alpha} using {title}: {error:.2f}%')
+
 
 if __name__ == "__main__":
     print("HousingPrices Project")
@@ -25,13 +38,12 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    # apprendi pesi tramite Ridge Regression
-    w = RidgeRegression.fit(alpha=0.1, reg_strength=10, max_iter=1000, S=data.x_train, y=data.y_train)
+    for a in range(0, 11):
+        alpha = a / 10
 
-    # esegui una predizione
-    y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
+        # apprendi pesi tramite Ridge Regression
+        w1 = RidgeRegression.gradient_descent(S=data.x_train, y=data.y_train, alpha=alpha)
+        w2 = RidgeRegression.svd(S=data.x_train, y=data.y_train, alpha=alpha)
 
-    # calcola errore
-    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
-
-    print(f'Mean absolute percentage error on test set: {error}%')
+        printPredict("Gradient Descent", alpha, w1)
+        printPredict("SVD", alpha, w2)
