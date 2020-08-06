@@ -26,26 +26,34 @@ class DataUtility:
 
     @staticmethod
     def load_data(csv_file: str) -> DataSet:
-        data_frame = pandas.read_csv(filepath_or_buffer=csv_file)
-
-        for c in data_frame.columns:
-            if data_frame[c].hasnans:
-                m = data_frame[c].mean()
-                data_frame[c].fillna(value=m, inplace=True)
-
         column_to_predict = 'median_house_value'
         categories_columns = ['ocean_proximity']
         numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms",
                             "population", "households", "median_income"]
 
+        # leggi tutto il file
+        data_frame = pandas.read_csv(filepath_or_buffer=csv_file)
+
+        # metti media in celle vuote
+        for c in data_frame.columns:
+            if data_frame[c].hasnans:
+                m = data_frame[c].mean()
+                data_frame[c].fillna(value=m, inplace=True)
+
+        # genera le colonne per ogni elemento di una colonna categoria
         columns_categories = DataUtility.categories_to_columns(data_frame=data_frame,
                                                                categories_columns=categories_columns)
+
+        # elimina le colonne categoria
         data_frame.drop(columns=categories_columns, inplace=True)
+
+        # aggiungi le colonne per ogni elemento di una colonna categoria
         data_frame = pandas.concat([data_frame, columns_categories], axis=1)
 
         columns_to_use = list(data_frame.columns)
         columns_to_use.remove(column_to_predict)
 
+        # dividi in X e y, sia di train che test
         x_train, x_test, y_train, y_test = train_test_split(
             data_frame[columns_to_use].to_numpy(),
             data_frame[column_to_predict].to_numpy(),
@@ -54,13 +62,16 @@ class DataUtility:
             shuffle=True
         )
 
+        # aggiunti titoli a colonne
         x_train = pandas.DataFrame(x_train, columns=columns_to_use)
         x_test = pandas.DataFrame(x_test, columns=columns_to_use)
 
+        # usa standard scaler sul train
         ss = StandardScaler()
         ss.fit(X=x_train[numerics_columns])
         x_train = ss.transform(X=x_train[numerics_columns])
 
+        # usa (X-μ / √σ²) sul test
         centered_df = x_test[numerics_columns] - ss.mean_
         x_test = centered_df / (ss.var_ ** 0.5)
 

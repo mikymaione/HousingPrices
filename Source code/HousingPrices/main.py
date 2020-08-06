@@ -17,16 +17,17 @@ import numpy
 
 from dataUtility import DataUtility
 from ridgeRegression import RidgeRegression
+from dataSet import DataSet
 
 
-def printPredict(title: str, alpha: float, w: numpy.ndarray) -> None:
+def printPredict(title: str, alpha: float, data: DataSet, w: numpy.ndarray) -> None:
     # esegui una predizione
     y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
 
     # calcola errore
     error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
 
-    print(f'Mean absolute percentage error on test set with alpha {alpha} using {title}: {error:.2f}%')
+    print(f'Mean absolute percentage error on test set with alpha {alpha:.1f} using {title}: {error:.2f}%')
 
 
 if __name__ == "__main__":
@@ -38,12 +39,10 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    for a in range(0, 11):
-        alpha = a / 10
-
+    for alpha in numpy.arange(0, 1.1, 0.1):
         # apprendi pesi tramite Ridge Regression
         w1 = RidgeRegression.gradient_descent(S=data.x_train, y=data.y_train, alpha=alpha)
         w2 = RidgeRegression.svd(S=data.x_train, y=data.y_train, alpha=alpha)
 
-        printPredict("Gradient Descent", alpha, w1)
-        printPredict("SVD", alpha, w2)
+        printPredict("Gradient Descent", alpha, data, w1)
+        printPredict("SVD", alpha, data, w2)

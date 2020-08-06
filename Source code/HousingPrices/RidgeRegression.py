@@ -57,11 +57,13 @@ class RidgeRegression:
             where J_w_k = cost function
                   J_w_k = (2 / m) * ( ((y_hat - y_real) * x_k) + (alpha * theta_k))
         """
-        w_hat = (w * S).sum(axis=1)
-        e = (w_hat - y).reshape(-1, 1)
 
-        j_theta = (2 / m) * ((e * S).sum(axis=0) + w)
-        w = w - (alpha * j_theta).reshape(-1)
+        for _ in range(1, 10):
+            # ||S∙w - y||²
+            EQ1 = ((w * S).sum(axis=1) - y).reshape(-1, 1)
+
+            # α∙||w||²
+            w = w - (alpha * (2 / m) * ((EQ1 * S).sum(axis=0) + w)).reshape(-1)
 
         return w
 
