@@ -55,21 +55,8 @@ class RidgeRegression:
         w = numpy.zeros(columns + 1)
         w_pred = w
 
-        """
-        Update model weights with batch gradient descent step.
-
-        Recall, the update statement for a model weight theta_k is:
-            w_k = w_k - (alpha * J_w_k)
-
-            where J_w_k = cost function
-                  J_w_k = (2 / m) * ( ((y_hat - y_real) * x_k) + (alpha * theta_k))
-        """
-
         for _ in range(1, 10):
-            # ||S∙w - y||²
             EQ1 = ((w * S).sum(axis=1) - y).reshape(-1, 1)
-
-            # α∙||w||²
             w = w - (alpha * (2 / m) * ((EQ1 * S).sum(axis=0) + w)).reshape(-1)
 
             if (w_pred == w).all():
