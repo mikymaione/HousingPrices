@@ -12,7 +12,6 @@
 # Study the dependence of the cross-validated risk estimate on the parameter alpha of ridge regression.
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
-
 import numpy
 import matplotlib.pyplot as plt
 
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     svd = []
     alphas = []
 
-    for alpha in numpy.arange(0.1, 1.1, 0.1):
+    for alpha in [0.1, 0.2, 0.3]:
         # apprendi pesi tramite Ridge Regression
         w1 = RidgeRegression.gradient_descent(S=data.x_train, y=data.y_train, alpha=alpha)
         w2 = RidgeRegression.svd(S=data.x_train, y=data.y_train, alpha=alpha)
