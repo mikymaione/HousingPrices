@@ -14,22 +14,22 @@ class RidgeRegression:
 
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, alpha: float) -> None:
         features = S.shape[1]
-        y_ = y.reshape(-1, 1)
+        y = y.reshape(-1, 1)
 
         S_offset = numpy.average(S, axis=0)
-        y_offset = numpy.average(y_, axis=0)
+        y_offset = numpy.average(y, axis=0)
 
-        S_ = S - S_offset
-        y_ = y_ - y_offset
+        S = S - S_offset
+        y = y - y_offset
 
         # Normalization is the process of scaling individual samples to have unit norm.
         # This process can be useful if you plan to use a quadratic form such as the dot-product or any other kernel to quantify the similarity of any pair of samples.
         # This assumption is the base of the Vector Space Model often used in text classification and clustering contexts.
         # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
-        S_, S_scale = preprocessing.normalize(S_, axis=0, copy=False, return_norm=True)
+        S, S_scale = preprocessing.normalize(S, axis=0, copy=False, return_norm=True)
 
-        Sy = S_.T.dot(y_)
-        A = S_.T.dot(S_)
+        Sy = S.T.dot(y)
+        A = S.T.dot(S)
 
         for i in range(features):
             A[i, i] += alpha
