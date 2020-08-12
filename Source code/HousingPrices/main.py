@@ -15,19 +15,16 @@
 import numpy
 import matplotlib.pyplot as plt
 
-from dataUtility import DataUtility
+from svd import SVD
 from ridgeRegression import RidgeRegression
 from dataSet import DataSet
+from dataUtility import DataUtility
 
 
-def printPredict(title: str, alpha: float, data: DataSet, w: numpy.ndarray) -> numpy.float64:
-    # esegui una predizione
-    y_predict = RidgeRegression.predict(x_test=data.x_test, w=w)
-
+def printPredict(title: str, alpha: float, data: DataSet, y_predict: numpy.ndarray) -> numpy.float64:
     # calcola errore
     error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
-
-    print(f'Mean absolute percentage error on test set with alpha {alpha:.1f} using {title}: {error:.2f}%')
+    print(f'Mean absolute percentage error on test set with alpha {alpha:.15f} using {title}: {error:.2f}%')
 
     return error
 
@@ -41,22 +38,31 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    gradientDescent = []
-    svd = []
-    alphas = []
+    _gradientDescent = []
+    _svd = []
+    _alphas = []
 
-    for alpha in [0.1, 0.2, 0.3]:
+    for alpha in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+                  0.9, 1, 1.1, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
-        w1 = RidgeRegression.gradient_descent(S=data.x_train, y=data.y_train, alpha=alpha)
-        w2 = RidgeRegression.svd(S=data.x_train, y=data.y_train, alpha=alpha)
+        ridgeRegression_ = RidgeRegression()
+        svd_ = SVD()
 
-        e1 = printPredict("Gradient Descent", alpha, data, w1)
-        e2 = printPredict("SVD", alpha, data, w2)
+        ridgeRegression_.elaborate(S=data.x_train, y=data.y_train, alpha=alpha)
+        svd_.elaborate(S=data.x_train, y=data.y_train, alpha=alpha)
 
-        alphas.append(alpha)
-        gradientDescent.append(e1)
-        svd.append(e2)
+        e1 = printPredict("Gradient Descent", alpha, data, ridgeRegression_.predict(data.x_test))
+        e2 = printPredict("SVD", alpha, data, svd_.predict(data.x_test))
 
-    plt.plot(alphas, gradientDescent)
-    plt.plot(alphas, svd)
+        _alphas.append(alpha)
+        _gradientDescent.append(e1)
+        _svd.append(e2)
+
+    plt.title("Linear regression")
+    plt.xlabel("Alpha")
+    plt.ylabel("MAPE")
+
+    lGD = plt.plot(_alphas, _gradientDescent, label="Gradient Descent")
+    lSVD = plt.plot(_alphas, _svd, label="SVD")
+    plt.legend(loc="upper left")
     plt.show()
