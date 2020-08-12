@@ -42,19 +42,19 @@ if __name__ == "__main__":
     _svd = []
     _alphas = []
 
-    for alpha in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
-                  0.9, 1, 1.1, 2, 5, 15]:
+    for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+              0.9, 1, 1.1, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
         ridgeRegression_ = RidgeRegression()
         svd_ = SVD()
 
-        ridgeRegression_.elaborate(S=data.x_train, y=data.y_train, alpha=alpha)
-        svd_.elaborate(S=data.x_train, y=data.y_train, alpha=alpha)
+        ridgeRegression_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
+        svd_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
 
-        e1 = printPredict("Gradient Descent", alpha, data, ridgeRegression_.predict(data.x_test))
-        e2 = printPredict("SVD", alpha, data, svd_.predict(data.x_test))
+        e1 = printPredict("Gradient Descent", ɑ, data, ridgeRegression_.predict(data.x_test))
+        e2 = printPredict("SVD", ɑ, data, svd_.predict(data.x_test))
 
-        _alphas.append(alpha)
+        _alphas.append(ɑ)
         _gradientDescent.append(e1)
         _svd.append(e2)
 

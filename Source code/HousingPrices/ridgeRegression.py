@@ -12,31 +12,36 @@ from sklearn import preprocessing
 
 class RidgeRegression:
 
-    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, alpha: float) -> None:
+    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
         features = S.shape[1]
         y = y.reshape(-1, 1)
 
-        S_offset = numpy.average(S, axis=0)
-        y_offset = numpy.average(y, axis=0)
+        # Compute the weighted arithmetic mean along the specified axis.
+        S_wam = numpy.average(S, axis=0)
+        y_wam = numpy.average(y, axis=0)
 
-        S = S - S_offset
-        y = y - y_offset
+        S = S - S_wam
+        y = y - y_wam
 
         # Normalization is the process of scaling individual samples to have unit norm.
         # This process can be useful if you plan to use a quadratic form such as the dot-product or any other kernel to quantify the similarity of any pair of samples.
         # This assumption is the base of the Vector Space Model often used in text classification and clustering contexts.
         # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
-        S, S_scale = preprocessing.normalize(S, axis=0, copy=False, return_norm=True)
+        S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
-        Sy = S.T.dot(y)
-        A = S.T.dot(S)
+        Sᵀy = S.T.dot(y)
+        SᵀS = S.T.dot(S)
 
+        # ɑ·I
         for i in range(features):
-            A[i, i] += alpha
+            SᵀS[i, i] += ɑ
 
-        w = numpy.linalg.solve(A, Sy).T
-        self.w = w / S_scale
-        self.intercetta = y_offset - S_offset.dot(self.w.T)
+        # Solve a linear matrix equation, or system of linear scalar equations.
+        # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
+        w = numpy.linalg.solve(SᵀS, Sᵀy).T
+
+        self.w = w / norm_L2
+        self.intercetta = y_wam - S_wam.dot(self.w.T)
 
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
         y_predict = x_test.dot(self.w.T) + self.intercetta
