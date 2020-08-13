@@ -15,25 +15,16 @@
 import numpy
 import matplotlib.pyplot as plt
 
+from sklearn.linear_model import Ridge
+
 from svd import SVD
+from lsqr import LSQR
 from cholesky import Cholesky
 from dataUtility import DataUtility
 
 
 def printPredict(title: str, alpha: float, error: float) -> None:
     print(f'Mean absolute percentage error on test set with alpha {alpha:.15f} using {title}: {error:.2f}%')
-
-
-def plotError(alphas, errors_cholesky, errors_svd):
-    plt.style.use('grayscale')
-    plt.title("Linear regression")
-    plt.xlabel("Alpha")
-    plt.ylabel("MAPE")
-
-    plt.plot(alphas, errors_cholesky, label="Cholesky")
-    plt.plot(alphas, errors_svd, label="SVD")
-    plt.legend(loc="upper left")
-    plt.show()
 
 
 if __name__ == "__main__":
@@ -45,31 +36,58 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
+    errors_scikit = []
     errors_cholesky = []
     errors_svd = []
+    errors_lsqr = []
     alphas = []
+
+    normalize = False
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
               0.9, 1, 1.1, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
         cholesky_ = Cholesky()
         svd_ = SVD()
+        lsqr_ = LSQR()
+        scikitRidge = Ridge(alpha=ɑ, solver="lsqr", normalize=normalize)
 
-        cholesky_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
+        scikitRidge.fit(data.x_train, data.y_train)
+        cholesky_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize)
         svd_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
+        lsqr_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize)
 
+        y_predictions_scikit = scikitRidge.predict(data.x_test)
         y_predictions_cholesky = cholesky_.predict(data.x_test)
         y_predictions_svd = svd_.predict(data.x_test)
+        y_predictions_lsqr = lsqr_.predict(data.x_test)
 
+        error_scikit = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predictions_scikit)
         error_cholesky = DataUtility.mean_absolute_percentage_error(y_test=data.y_test,
                                                                     y_predict=y_predictions_cholesky)
         error_svd = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predictions_svd)
+        error_lsqr = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predictions_lsqr)
 
+        errors_scikit.append(error_scikit)
         errors_cholesky.append(error_cholesky)
         errors_svd.append(error_svd)
+        errors_lsqr.append(error_lsqr)
         alphas.append(ɑ)
 
+        printPredict("Scikit", ɑ, error_scikit)
         printPredict("Cholesky", ɑ, error_cholesky)
         printPredict("SVD", ɑ, error_svd)
+        printPredict("LSQR", ɑ, error_lsqr)
 
-    plotError(alphas, errors_cholesky, errors_svd)
+    # plt.style.use('grayscale')
+    plt.title("Linear regression")
+    plt.xlabel("Alpha")
+    plt.ylabel("MAPE")
+
+    plt.plot(alphas, errors_scikit, label="Scikit")
+    plt.plot(alphas, errors_cholesky, label="Cholesky")
+    plt.plot(alphas, errors_svd, label="SVD")
+    plt.plot(alphas, errors_lsqr, label="LSQR")
+
+    plt.legend(loc="upper left")
+    plt.show()
