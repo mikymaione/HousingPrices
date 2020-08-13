@@ -10,7 +10,7 @@ import numpy
 from sklearn import preprocessing
 
 
-class RidgeRegression:
+class Cholesky:
 
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
         features = S.shape[1]

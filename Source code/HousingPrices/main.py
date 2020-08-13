@@ -16,17 +16,13 @@ import numpy
 import matplotlib.pyplot as plt
 
 from svd import SVD
-from ridgeRegression import RidgeRegression
+from cholesky import Cholesky
 from dataSet import DataSet
 from dataUtility import DataUtility
 
 
-def printPredict(title: str, alpha: float, data: DataSet, y_predict: numpy.ndarray) -> numpy.float64:
-    # calcola errore
-    error = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_predict)
+def printPredict(title: str, alpha: float, error: float) -> None:
     print(f'Mean absolute percentage error on test set with alpha {alpha:.15f} using {title}: {error:.2f}%')
-
-    return error
 
 
 if __name__ == "__main__":
@@ -38,31 +34,34 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    _gradientDescent = []
+    _cholesky = []
     _svd = []
     _alphas = []
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
               0.9, 1, 1.1, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
-        ridgeRegression_ = RidgeRegression()
+        cholesky_ = Cholesky()
         svd_ = SVD()
 
-        ridgeRegression_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
+        cholesky_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
         svd_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
 
-        e1 = printPredict("Gradient Descent", ɑ, data, ridgeRegression_.predict(data.x_test))
-        e2 = printPredict("SVD", ɑ, data, svd_.predict(data.x_test))
+        e1 = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=cholesky_.predict(data.x_test))
+        e2 = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=svd_.predict(data.x_test))
 
         _alphas.append(ɑ)
-        _gradientDescent.append(e1)
+        _cholesky.append(e1)
         _svd.append(e2)
+
+        printPredict("Cholesky", ɑ, e1)
+        printPredict("SVD", ɑ, data, e2)
 
     plt.title("Linear regression")
     plt.xlabel("Alpha")
     plt.ylabel("MAPE")
 
-    lGD = plt.plot(_alphas, _gradientDescent, label="Gradient Descent")
+    lGD = plt.plot(_alphas, _cholesky, label="Cholesky")
     lSVD = plt.plot(_alphas, _svd, label="SVD")
     plt.legend(loc="upper left")
     plt.show()
