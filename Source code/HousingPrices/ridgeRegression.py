@@ -32,7 +32,6 @@ class RidgeRegression:
         Sᵀy = S.T.dot(y)
         SᵀS = S.T.dot(S)
 
-        # ɑ·I
         for i in range(features):
             SᵀS[i, i] += ɑ
 
