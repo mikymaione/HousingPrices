@@ -49,7 +49,7 @@ if __name__ == "__main__":
         lsqr_ = LSQR()
 
         cholesky_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize)
-        svd_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ)
+        svd_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize)
         lsqr_.elaborate(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize)
 
         y_predictions_cholesky = cholesky_.predict(data.x_test)

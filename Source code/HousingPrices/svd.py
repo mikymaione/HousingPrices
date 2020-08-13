@@ -8,13 +8,14 @@
 
 import numpy
 
+from linearRegression import LinearRegression
 
-class SVD:
+
+class SVD(LinearRegression):
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
-    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
-        y = y.reshape((16512, 1))
-        S = numpy.append(numpy.ones(S.shape[0]).reshape(-1, 1), S, axis=1)
+    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
+        y = y.reshape(-1, 1)
 
         # Singular Value Decomposition.
         # U: Unitary array; eigenvectors of SSᵀ
@@ -23,31 +24,14 @@ class SVD:
         U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
         UR = numpy.dot(U.T, y)
 
-        # Expand alpha to a collection if it's just a single value
-        ɑ = numpy.ones(y.shape[1]) * ɑ
-
-        # Normalize alpha by the LSV norm
-        norm = Σ[0]
-        normalized_alpha = ɑ * norm
-
         # Compute weights for each alpha
         # Returns the sorted unique elements of an array.
-        unique_alphas = numpy.unique(normalized_alpha)
+        unique_alphas = numpy.unique(ɑ)
         wt = numpy.zeros((S.shape[1], y.shape[1]))
 
         for ua in unique_alphas:
-            selvox = numpy.nonzero(normalized_alpha == ua)[0]
+            selvox = numpy.nonzero(ɑ == ua)[0]
             awt = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ua ** 2))).dot(UR[:, selvox])
             wt[:, selvox] = awt
 
-        self.w = wt[:, 0]
-
-    def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
-        m = x_test.shape[0]
-
-        if self.w.shape[0] > x_test.shape[1]:
-            x_test = numpy.append(numpy.ones(m).reshape(-1, 1), x_test, axis=1)
-
-        y_predict = (self.w * x_test).sum(axis=1)
-
-        return y_predict
+        return wt[:, 0]
