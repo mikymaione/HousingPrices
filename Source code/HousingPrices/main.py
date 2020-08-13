@@ -55,7 +55,7 @@ if __name__ == "__main__":
         _svd.append(e2)
 
         printPredict("Cholesky", ɑ, e1)
-        printPredict("SVD", ɑ, data, e2)
+        printPredict("SVD", ɑ, e2)
 
     plt.title("Linear regression")
     plt.xlabel("Alpha")
