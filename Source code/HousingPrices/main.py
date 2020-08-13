@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 
 from svd import SVD
 from cholesky import Cholesky
-from dataSet import DataSet
 from dataUtility import DataUtility
 
 
