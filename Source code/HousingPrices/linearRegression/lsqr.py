@@ -15,6 +15,9 @@ from linearRegression.linearRegression import LinearRegression
 class LSQR(LinearRegression):
 
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
+        # Find the least-squares solution to a large, sparse, linear system of equations.
+        # Levenberg–Marquardt algorithm also known as the damped least-squares
+        # [Sᵀ·S + α·diag(Sᵀ·S)]·δ = Sᵀ·[y - w]
         w = scipy.sparse.linalg.lsqr(S, y, damp=ɑ ** 0.5)
 
         return w[0]

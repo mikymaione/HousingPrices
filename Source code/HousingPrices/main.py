@@ -36,7 +36,7 @@ def doPrediction(data: DataSet, normalize: bool):
     print(title)
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
-              0.9, 1, 1.1, 2, 5, 15]:
+              0.9, 1, 1.1, 1.5, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
         cholesky_ = Cholesky()
         svd_ = SVD()
@@ -85,5 +85,5 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    doPrediction(data=data, normalize=True)
-    doPrediction(data=data, normalize=False)
+    for normalize in [True, False]:
+        doPrediction(data=data, normalize=normalize)
