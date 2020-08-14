@@ -24,14 +24,6 @@ class SVD(LinearRegression):
         U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
         UR = numpy.dot(U.T, y)
 
-        # Compute weights for each alpha
-        # Returns the sorted unique elements of an array.
-        unique_alphas = numpy.unique(ɑ)
-        wt = numpy.zeros((S.shape[1], y.shape[1]))
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ɑ ** 2))).dot(UR)
 
-        for ua in unique_alphas:
-            selvox = numpy.nonzero(ɑ == ua)[0]
-            awt = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ua ** 2))).dot(UR[:, selvox])
-            wt[:, selvox] = awt
-
-        return wt[:, 0]
+        return w.reshape(1, -1)
