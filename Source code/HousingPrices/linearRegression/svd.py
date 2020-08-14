@@ -8,7 +8,7 @@
 
 import numpy
 
-from linearRegression import LinearRegression
+from linearRegression.linearRegression import LinearRegression
 
 
 class SVD(LinearRegression):

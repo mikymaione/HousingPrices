@@ -7,23 +7,14 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+import scipy.sparse.linalg
 
-from linearRegression import LinearRegression
+from linearRegression.linearRegression import LinearRegression
 
 
-class Cholesky(LinearRegression):
+class LSQR(LinearRegression):
 
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
-        features = S.shape[1]
+        w = scipy.sparse.linalg.lsqr(S, y, damp=ɑ ** 0.5)
 
-        Sᵀy = S.T.dot(y)
-        SᵀS = S.T.dot(S)
-
-        for i in range(features):
-            SᵀS[i, i] += ɑ
-
-        # Solve a linear matrix equation, or system of linear scalar equations.
-        # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
-        w = numpy.linalg.solve(SᵀS, Sᵀy).T
-
-        return w
+        return w[0]

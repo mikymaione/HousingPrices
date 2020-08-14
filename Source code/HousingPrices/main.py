@@ -15,12 +15,11 @@
 
 import matplotlib.pyplot as plt
 
-from dataSet import DataSet
-
-from svd import SVD
-from lsqr import LSQR
-from cholesky import Cholesky
-from dataUtility import DataUtility
+from utility.dataSet import DataSet
+from utility.dataUtility import DataUtility
+from linearRegression.svd import SVD
+from linearRegression.lsqr import LSQR
+from linearRegression.cholesky import Cholesky
 
 
 def printPredict(title: str, ɑ: float, error: float) -> None:
