@@ -13,6 +13,7 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
+import numpy
 import matplotlib.pyplot as plt
 
 from Utility.dataSet import DataSet
@@ -22,15 +23,34 @@ from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
 
-def printPredict(title: str, ɑ: float, error: float) -> None:
-    print(f'{title}\t\t\tɑ = {ɑ:.15f}\t\t\t\tMAPE: {error:.2f}%')
+def printPredict(title: str, ɑ: float, error: numpy.float64, r2: numpy.float64) -> None:
+    print(f'{title}\t\t\tɑ = {ɑ:.15f}\t\t\t\tMAPE: {error:.2f}%\t\t\t\tR²: {r2:.15f}')
+
+
+def plotThis(title: str, xlabel: str, ylabel: str, x, y, labels):
+    # plt.style.use('grayscale')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    plt.plot(x, y[0], label=labels[0])
+    plt.plot(x, y[1], label=labels[1])
+    plt.plot(x, y[2], label=labels[2])
+
+    plt.legend(loc="upper left")
+    plt.show()
 
 
 def doPrediction(data: DataSet, normalize: bool):
+    alphas = []
+
     errors_cholesky = []
     errors_svd = []
     errors_lsqr = []
-    alphas = []
+
+    errors_r2_cholesky = []
+    errors_r2_svd = []
+    errors_r2_lsqr = []
 
     title = f"Linear regression using normalization: {normalize}"
     print(title)
@@ -54,26 +74,27 @@ def doPrediction(data: DataSet, normalize: bool):
         error_lsqr = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_lsqr)
         error_cholesky = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_cholesky)
 
+        r2_svd = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_svd)
+        r2_lsqr = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_lsqr)
+        r2_cholesky = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_cholesky)
+
         errors_cholesky.append(error_cholesky)
         errors_svd.append(error_svd)
         errors_lsqr.append(error_lsqr)
+
+        errors_r2_cholesky.append(r2_cholesky)
+        errors_r2_svd.append(r2_svd)
+        errors_r2_lsqr.append(r2_lsqr)
+
         alphas.append(ɑ)
 
-        printPredict("Cholesky", ɑ, error_cholesky)
-        printPredict("SVD", ɑ, error_svd)
-        printPredict("LSQR", ɑ, error_lsqr)
+        printPredict("Cholesky", ɑ, error_cholesky, r2_cholesky)
+        printPredict("SVD", ɑ, error_svd, r2_svd)
+        printPredict("LSQR", ɑ, error_lsqr, r2_lsqr)
 
-    # plt.style.use('grayscale')
-    plt.title(title)
-    plt.xlabel("Alpha")
-    plt.ylabel("MAPE")
-
-    plt.plot(alphas, errors_cholesky, label="Cholesky")
-    plt.plot(alphas, errors_svd, label="SVD")
-    plt.plot(alphas, errors_lsqr, label="LSQR")
-
-    plt.legend(loc="upper left")
-    plt.show()
+    labels = ["Cholesky", "SVD", "LSQR"]
+    plotThis(title, "Alpha", "MAPE", alphas, [errors_cholesky, errors_svd, errors_lsqr], labels)
+    plotThis(title, "Alpha", "R²", alphas, [errors_r2_cholesky, errors_r2_svd, errors_r2_lsqr], labels)
 
 
 if __name__ == "__main__":

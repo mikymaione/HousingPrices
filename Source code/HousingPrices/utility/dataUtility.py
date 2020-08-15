@@ -19,6 +19,16 @@ from Utility.dataSet import DataSet
 class DataUtility:
 
     @staticmethod
+    def coefficient_of_determination(y_test: numpy.ndarray, y_predict: numpy.ndarray) -> numpy.float64:
+        correlation_matrix = numpy.corrcoef(y_test, y_predict)
+
+        correlation_xy = correlation_matrix[0, 1]
+
+        r_squared = correlation_xy ** 2
+
+        return r_squared
+
+    @staticmethod
     def mean_absolute_percentage_error(y_test: numpy.ndarray, y_predict: numpy.ndarray) -> numpy.float64:
         abs_errors = numpy.abs((y_test - y_predict) / y_test)
 
