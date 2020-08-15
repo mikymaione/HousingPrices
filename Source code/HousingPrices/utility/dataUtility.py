@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from typing import List
 
-from utility.dataSet import DataSet
+from Utility.dataSet import DataSet
 
 
 class DataUtility:

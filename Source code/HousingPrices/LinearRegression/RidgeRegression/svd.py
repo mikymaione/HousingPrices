@@ -7,17 +7,23 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
-import scipy.sparse.linalg
 
-from linearRegression.linearRegression import LinearRegression
+from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeRegression
 
 
-class LSQR(LinearRegression):
+class SVD(BaseRidgeRegression):
 
+    # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
-        # Find the least-squares solution to a large, sparse, linear system of equations.
-        # Levenberg–Marquardt algorithm also known as the damped least-squares
-        # [Sᵀ·S + α·diag(Sᵀ·S)]·δ = Sᵀ·[y - w]
-        w = scipy.sparse.linalg.lsqr(S, y, damp=ɑ ** 0.5)
+        y = y.reshape(-1, 1)
 
-        return w[0]
+        # Singular Value Decomposition.
+        # U: Unitary array; eigenvectors of SSᵀ
+        # Σ: Vector with the singular values, sorted in descending order
+        # Vᵀ: Unitary array (Conjugate transpose); eigenvectors of SᵀS
+        U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
+        UR = numpy.dot(U.T, y)
+
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ɑ ** 2))).dot(UR)
+
+        return w.reshape(1, -1)

@@ -8,10 +8,10 @@
 
 import numpy
 
-from linearRegression.linearRegression import LinearRegression
+from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeRegression
 
 
-class Cholesky(LinearRegression):
+class Cholesky(BaseRidgeRegression):
 
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
         features = S.shape[1]

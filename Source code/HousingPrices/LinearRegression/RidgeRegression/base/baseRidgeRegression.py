@@ -11,7 +11,7 @@ import numpy
 from sklearn import preprocessing
 
 
-class LinearRegression:
+class BaseRidgeRegression:
 
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool) -> None:
         norm_L2 = 1
