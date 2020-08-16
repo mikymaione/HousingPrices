@@ -16,7 +16,7 @@
 import numpy
 import matplotlib.pyplot as plt
 
-from Utility.dataSet import DataSet
+from Utility.dataSet import DataSet, DataElaboration
 from Utility.dataUtility import DataUtility
 from LinearRegression.RidgeRegression.svd import SVD
 from LinearRegression.RidgeRegression.lsqr import LSQR
@@ -27,13 +27,14 @@ def printPredict(title: str, ɑ: float, error: numpy.float64, r2: numpy.float64)
     print(f'{title}\t\t\tɑ = {ɑ:.15f}\t\t\t\tMAPE: {error:.2f}%\t\t\t\tR²: {r2:.15f}')
 
 
-def doPrediction(data: DataSet, normalize: bool, alphas, errors_cholesky, errors_svd, errors_lsqr, errors_r2_cholesky,
-                 errors_r2_svd, errors_r2_lsqr):
+def doPrediction(data: DataSet, normalize: bool) -> DataElaboration:
     title = f"Ridge regression using normalization: {normalize}"
     print(title)
 
-    for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
-              0.9, 1, 1.1, 1.5, 2, 5, 15]:
+    R = DataElaboration([], [], [], [], [], [], [])
+
+    for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
+              1.1, 1.5, 2, 5, 15]:
         # apprendi pesi tramite Ridge Regression
         cholesky_ = Cholesky()
         svd_ = SVD()
@@ -47,27 +48,29 @@ def doPrediction(data: DataSet, normalize: bool, alphas, errors_cholesky, errors
         y_svd = svd_.predict(data.x_test)
         y_lsqr = lsqr_.predict(data.x_test)
 
-        error_svd = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_svd)
-        error_lsqr = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_lsqr)
-        error_cholesky = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_cholesky)
+        mape_cholesky = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_cholesky)
+        mape_svd = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_svd)
+        mape_lsqr = DataUtility.mean_absolute_percentage_error(y_test=data.y_test, y_predict=y_lsqr)
 
+        r2_cholesky = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_cholesky)
         r2_svd = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_svd)
         r2_lsqr = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_lsqr)
-        r2_cholesky = DataUtility.coefficient_of_determination(y_test=data.y_test, y_predict=y_cholesky)
 
-        errors_cholesky.append(error_cholesky)
-        errors_svd.append(error_svd)
-        errors_lsqr.append(error_lsqr)
+        R.mapes_cholesky.append(mape_cholesky)
+        R.mapes_svd.append(mape_svd)
+        R.mapes_lsqr.append(mape_lsqr)
 
-        errors_r2_cholesky.append(r2_cholesky)
-        errors_r2_svd.append(r2_svd)
-        errors_r2_lsqr.append(r2_lsqr)
+        R.r2s_cholesky.append(r2_cholesky)
+        R.r2s_svd.append(r2_svd)
+        R.r2s_lsqr.append(r2_lsqr)
 
-        alphas.append(ɑ)
+        R.alphas.append(ɑ)
 
-        printPredict("Cholesky", ɑ, error_cholesky, r2_cholesky)
-        printPredict("SVD", ɑ, error_svd, r2_svd)
-        printPredict("LSQR", ɑ, error_lsqr, r2_lsqr)
+        printPredict("Cholesky", ɑ, mape_cholesky, r2_cholesky)
+        printPredict("SVD", ɑ, mape_svd, r2_svd)
+        printPredict("LSQR", ɑ, mape_lsqr, r2_lsqr)
+
+    return R
 
 
 if __name__ == "__main__":
@@ -100,32 +103,22 @@ if __name__ == "__main__":
             asx = ax3
             adx = ax4
 
-        alphas = []
-
-        errors_cholesky = []
-        errors_svd = []
-        errors_lsqr = []
-
-        errors_r2_cholesky = []
-        errors_r2_svd = []
-        errors_r2_lsqr = []
-
-        doPrediction(data, normalize, alphas, errors_cholesky, errors_svd, errors_lsqr, errors_r2_cholesky,
-                     errors_r2_svd, errors_r2_lsqr)
+        P = doPrediction(data=data, normalize=normalize)
 
         asx.set_title(f"Normalization: {normalize}")
-        asx.plot(alphas, errors_cholesky, label=labels[0])
-        asx.plot(alphas, errors_svd, label=labels[1])
-        asx.plot(alphas, errors_lsqr, label=labels[2])
+        asx.plot(P.alphas, P.mapes_cholesky, label=labels[0])
+        asx.plot(P.alphas, P.mapes_svd, label=labels[1])
+        asx.plot(P.alphas, P.mapes_lsqr, label=labels[2])
 
         adx.set_title(f"Normalization: {normalize}")
-        adx.plot(alphas, errors_r2_cholesky, label=labels[0])
-        adx.plot(alphas, errors_r2_svd, label=labels[1])
-        adx.plot(alphas, errors_r2_lsqr, label=labels[2])
+        adx.plot(P.alphas, P.r2s_cholesky, label=labels[0])
+        adx.plot(P.alphas, P.r2s_svd, label=labels[1])
+        adx.plot(P.alphas, P.r2s_lsqr, label=labels[2])
 
     ax1.legend()
     ax2.legend()
     ax3.legend()
     ax4.legend()
-
+    
+    plt.tight_layout()
     plt.show()

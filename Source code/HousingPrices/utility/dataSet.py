@@ -12,6 +12,17 @@ from dataclasses import dataclass
 
 
 @dataclass
+class DataElaboration:
+    alphas: list
+    mapes_cholesky: list
+    mapes_svd: list
+    mapes_lsqr: list
+    r2s_cholesky: list
+    r2s_svd: list
+    r2s_lsqr: list
+
+
+@dataclass
 class DataSet:
     x_train: numpy.ndarray
     x_test: numpy.ndarray
