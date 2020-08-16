@@ -66,11 +66,18 @@ class DataUtility:
         columns_to_use.remove(column_to_predict)
 
         # dividi in X e y, sia di train che test
+        # Split arrays or matrices into random train and test subsets
         x_train, x_test, y_train, y_test = train_test_split(
             data_frame[columns_to_use].to_numpy(),
             data_frame[column_to_predict].to_numpy(),
+
+            # If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split.
             test_size=0.2,
-            random_state=41,
+
+            # Controls the shuffling applied to the data before applying the split. Pass an int for reproducible output across multiple function calls.
+            random_state=1986,
+
+            # Whether or not to shuffle the data before splitting
             shuffle=True
         )
 
@@ -78,7 +85,9 @@ class DataUtility:
         x_train = pandas.DataFrame(x_train, columns=columns_to_use)
         x_test = pandas.DataFrame(x_test, columns=columns_to_use)
 
-        # usa standard scaler sul train
+        # Standardize features by removing the mean and scaling to unit variance
+        # The standard score of a sample X is calculated as:
+        # z = (X - μ) / σ²
         ss = StandardScaler()
         ss.fit(X=x_train[numerics_columns])
         x_train = ss.transform(X=x_train[numerics_columns])

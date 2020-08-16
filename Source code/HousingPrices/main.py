@@ -71,7 +71,7 @@ def execute(data: DataSet, tabulateOutput):
     labels = ["Cholesky", "SVD", "LSQR"]
 
     for normalize in [True, False]:
-        plt.style.use('grayscale')
+        # plt.style.use('grayscale')
 
         fig, (ax1, ax2) = plt.subplots(1, 2)
         fig.suptitle(f"Normalization: {normalize}")
