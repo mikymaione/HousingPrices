@@ -24,7 +24,7 @@ from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
 
-def doPrediction(data: DataSet, normalize: bool, table) -> DataElaboration:
+def doPrediction(data: DataSet, normalize: bool, tabulateOutput) -> DataElaboration:
     R = DataElaboration([], [], [], [], [], [], [])
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
@@ -60,11 +60,44 @@ def doPrediction(data: DataSet, normalize: bool, table) -> DataElaboration:
 
         R.alphas.append(ɑ)
 
-        table.append([normalize, "Cholesky", ɑ, mape_cholesky, r2_cholesky])
-        table.append([normalize, "SVD", ɑ, mape_svd, r2_svd])
-        table.append([normalize, "LSQR", ɑ, mape_lsqr, r2_lsqr])
+        tabulateOutput.append([normalize, "Cholesky", ɑ, mape_cholesky, r2_cholesky])
+        tabulateOutput.append([normalize, "SVD", ɑ, mape_svd, r2_svd])
+        tabulateOutput.append([normalize, "LSQR", ɑ, mape_lsqr, r2_lsqr])
 
     return R
+
+
+def execute(data: DataSet, tabulateOutput):
+    labels = ["Cholesky", "SVD", "LSQR"]
+
+    for normalize in [True, False]:
+        plt.style.use('grayscale')
+
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        fig.suptitle(f"Normalization: {normalize}")
+        fig.canvas.set_window_title('Ridge regression')
+
+        ax1.set_title("MAPE")
+        ax2.set_title("R²")
+
+        ax1.set_xlabel("Alpha")
+        ax1.set_ylabel("MAPE")
+        ax2.set_xlabel("Alpha")
+        ax2.set_ylabel("R²")
+
+        P = doPrediction(data=data, normalize=normalize, tabulateOutput=tabulateOutput)
+
+        ax1.plot(P.alphas, P.mapes_cholesky, label=labels[0])
+        ax1.plot(P.alphas, P.mapes_svd, label=labels[1])
+        ax1.plot(P.alphas, P.mapes_lsqr, label=labels[2])
+
+        ax2.plot(P.alphas, P.r2s_cholesky, label=labels[0])
+        ax2.plot(P.alphas, P.r2s_svd, label=labels[1])
+        ax2.plot(P.alphas, P.r2s_lsqr, label=labels[2])
+
+        ax1.legend()
+        ax2.legend()
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -76,48 +109,8 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    plt.style.use('grayscale')
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    fig.canvas.set_window_title('Ridge regression')
+    tabulateOutput = []
 
-    ax1.set_xlabel("Alpha")
-    ax1.set_ylabel("MAPE")
-    ax2.set_xlabel("Alpha")
-    ax2.set_ylabel("R²")
-    ax3.set_xlabel("Alpha")
-    ax3.set_ylabel("MAPE")
-    ax4.set_xlabel("Alpha")
-    ax4.set_ylabel("R²")
+    execute(data=data, tabulateOutput=tabulateOutput)
 
-    labels = ["Cholesky", "SVD", "LSQR"]
-    table = []
-
-    for normalize in [True, False]:
-        if normalize:
-            asx = ax1
-            adx = ax2
-        else:
-            asx = ax3
-            adx = ax4
-
-        P = doPrediction(data=data, normalize=normalize, table=table)
-
-        asx.set_title(f"Normalization: {normalize}")
-        asx.plot(P.alphas, P.mapes_cholesky, label=labels[0])
-        asx.plot(P.alphas, P.mapes_svd, label=labels[1])
-        asx.plot(P.alphas, P.mapes_lsqr, label=labels[2])
-
-        adx.set_title(f"Normalization: {normalize}")
-        adx.plot(P.alphas, P.r2s_cholesky, label=labels[0])
-        adx.plot(P.alphas, P.r2s_svd, label=labels[1])
-        adx.plot(P.alphas, P.r2s_lsqr, label=labels[2])
-
-    ax1.legend()
-    ax2.legend()
-    ax3.legend()
-    ax4.legend()
-
-    print(tabulate(table, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
-
-    plt.tight_layout()
-    plt.show()
+    print(tabulate(tabulateOutput, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
