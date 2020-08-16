@@ -16,6 +16,8 @@
 import numpy
 import matplotlib.pyplot as plt
 
+from tabulate import tabulate
+
 from Utility.dataSet import DataSet, DataElaboration
 from Utility.dataUtility import DataUtility
 from LinearRegression.RidgeRegression.svd import SVD
@@ -23,14 +25,7 @@ from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
 
-def printPredict(title: str, ɑ: float, error: numpy.float64, r2: numpy.float64) -> None:
-    print(f'{title}\t\t\tɑ = {ɑ:.15f}\t\t\t\tMAPE: {error:.2f}%\t\t\t\tR²: {r2:.15f}')
-
-
-def doPrediction(data: DataSet, normalize: bool) -> DataElaboration:
-    title = f"Ridge regression using normalization: {normalize}"
-    print(title)
-
+def doPrediction(data: DataSet, normalize: bool, table) -> DataElaboration:
     R = DataElaboration([], [], [], [], [], [], [])
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
@@ -66,9 +61,9 @@ def doPrediction(data: DataSet, normalize: bool) -> DataElaboration:
 
         R.alphas.append(ɑ)
 
-        printPredict("Cholesky", ɑ, mape_cholesky, r2_cholesky)
-        printPredict("SVD", ɑ, mape_svd, r2_svd)
-        printPredict("LSQR", ɑ, mape_lsqr, r2_lsqr)
+        table.append([normalize, "Cholesky", ɑ, mape_cholesky, r2_cholesky])
+        table.append([normalize, "SVD", ɑ, mape_svd, r2_svd])
+        table.append([normalize, "LSQR", ɑ, mape_lsqr, r2_lsqr])
 
     return R
 
@@ -95,6 +90,8 @@ if __name__ == "__main__":
     ax4.set_xlabel("Alpha")
     ax4.set_ylabel("R²")
 
+    table = []
+
     for normalize in [True, False]:
         if normalize:
             asx = ax1
@@ -103,7 +100,7 @@ if __name__ == "__main__":
             asx = ax3
             adx = ax4
 
-        P = doPrediction(data=data, normalize=normalize)
+        P = doPrediction(data=data, normalize=normalize, table=table)
 
         asx.set_title(f"Normalization: {normalize}")
         asx.plot(P.alphas, P.mapes_cholesky, label=labels[0])
@@ -119,6 +116,8 @@ if __name__ == "__main__":
     ax2.legend()
     ax3.legend()
     ax4.legend()
-    
+
+    print(tabulate(table, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
+
     plt.tight_layout()
-    plt.show()
+    # plt.show()
