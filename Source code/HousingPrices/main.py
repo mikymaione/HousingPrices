@@ -27,32 +27,9 @@ def printPredict(title: str, ɑ: float, error: numpy.float64, r2: numpy.float64)
     print(f'{title}\t\t\tɑ = {ɑ:.15f}\t\t\t\tMAPE: {error:.2f}%\t\t\t\tR²: {r2:.15f}')
 
 
-def plotThis(title: str, xlabel: str, ylabel: str, x, y, labels):
-    # plt.style.use('grayscale')
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-
-    plt.plot(x, y[0], label=labels[0])
-    plt.plot(x, y[1], label=labels[1])
-    plt.plot(x, y[2], label=labels[2])
-
-    plt.legend(loc="upper left")
-    plt.show()
-
-
-def doPrediction(data: DataSet, normalize: bool):
-    alphas = []
-
-    errors_cholesky = []
-    errors_svd = []
-    errors_lsqr = []
-
-    errors_r2_cholesky = []
-    errors_r2_svd = []
-    errors_r2_lsqr = []
-
-    title = f"Linear regression using normalization: {normalize}"
+def doPrediction(data: DataSet, normalize: bool, alphas, errors_cholesky, errors_svd, errors_lsqr, errors_r2_cholesky,
+                 errors_r2_svd, errors_r2_lsqr):
+    title = f"Ridge regression using normalization: {normalize}"
     print(title)
 
     for ɑ in [0, 1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
@@ -92,10 +69,6 @@ def doPrediction(data: DataSet, normalize: bool):
         printPredict("SVD", ɑ, error_svd, r2_svd)
         printPredict("LSQR", ɑ, error_lsqr, r2_lsqr)
 
-    labels = ["Cholesky", "SVD", "LSQR"]
-    plotThis(title, "Alpha", "MAPE", alphas, [errors_cholesky, errors_svd, errors_lsqr], labels)
-    plotThis(title, "Alpha", "R²", alphas, [errors_r2_cholesky, errors_r2_svd, errors_r2_lsqr], labels)
-
 
 if __name__ == "__main__":
     print("HousingPrices Project")
@@ -106,5 +79,53 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
+    labels = ["Cholesky", "SVD", "LSQR"]
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    fig.canvas.set_window_title('Ridge regression')
+
+    ax1.set_xlabel("Alpha")
+    ax1.set_ylabel("MAPE")
+    ax2.set_xlabel("Alpha")
+    ax2.set_ylabel("R²")
+    ax3.set_xlabel("Alpha")
+    ax3.set_ylabel("MAPE")
+    ax4.set_xlabel("Alpha")
+    ax4.set_ylabel("R²")
+
     for normalize in [True, False]:
-        doPrediction(data=data, normalize=normalize)
+        if normalize:
+            asx = ax1
+            adx = ax2
+        else:
+            asx = ax3
+            adx = ax4
+
+        alphas = []
+
+        errors_cholesky = []
+        errors_svd = []
+        errors_lsqr = []
+
+        errors_r2_cholesky = []
+        errors_r2_svd = []
+        errors_r2_lsqr = []
+
+        doPrediction(data, normalize, alphas, errors_cholesky, errors_svd, errors_lsqr, errors_r2_cholesky,
+                     errors_r2_svd, errors_r2_lsqr)
+
+        asx.set_title(f"Normalization: {normalize}")
+        asx.plot(alphas, errors_cholesky, label=labels[0])
+        asx.plot(alphas, errors_svd, label=labels[1])
+        asx.plot(alphas, errors_lsqr, label=labels[2])
+
+        adx.set_title(f"Normalization: {normalize}")
+        adx.plot(alphas, errors_r2_cholesky, label=labels[0])
+        adx.plot(alphas, errors_r2_svd, label=labels[1])
+        adx.plot(alphas, errors_r2_lsqr, label=labels[2])
+
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    ax4.legend()
+
+    plt.show()
