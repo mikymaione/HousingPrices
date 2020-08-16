@@ -13,7 +13,6 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
-import numpy
 import matplotlib.pyplot as plt
 
 from tabulate import tabulate
@@ -77,7 +76,7 @@ if __name__ == "__main__":
     # carica i dati
     data = DataUtility.load_data(csv_file="cal-housing.csv")
 
-    labels = ["Cholesky", "SVD", "LSQR"]
+    plt.style.use('grayscale')
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     fig.canvas.set_window_title('Ridge regression')
 
@@ -90,6 +89,7 @@ if __name__ == "__main__":
     ax4.set_xlabel("Alpha")
     ax4.set_ylabel("R²")
 
+    labels = ["Cholesky", "SVD", "LSQR"]
     table = []
 
     for normalize in [True, False]:
@@ -120,4 +120,4 @@ if __name__ == "__main__":
     print(tabulate(table, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
 
     plt.tight_layout()
-    # plt.show()
+    plt.show()

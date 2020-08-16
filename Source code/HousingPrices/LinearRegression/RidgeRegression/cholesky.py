@@ -13,6 +13,7 @@ from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeR
 
 class Cholesky(BaseRidgeRegression):
 
+    # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Regolarizzazione_generalizzata_di_Tikhonov
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
         features = S.shape[1]
 

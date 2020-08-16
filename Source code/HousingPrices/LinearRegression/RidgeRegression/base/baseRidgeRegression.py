@@ -31,9 +31,7 @@ class BaseRidgeRegression:
             # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
             S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
-        self.w = self.calculateWeights(S, y, ɑ)
-
-        self.w /= norm_L2
+        self.w = self.calculateWeights(S, y, ɑ) / norm_L2
         self.intercetta = y_wam - S_wam.dot(self.w.T)
 
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
@@ -41,5 +39,6 @@ class BaseRidgeRegression:
 
         return y_predict.reshape(1, -1)
 
+    # abstract
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
-        return numpy.zeros(y.shape[0])
+        raise NotImplementedError("Please Implement this method")

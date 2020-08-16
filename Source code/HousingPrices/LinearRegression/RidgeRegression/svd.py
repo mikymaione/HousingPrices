@@ -22,8 +22,9 @@ class SVD(BaseRidgeRegression):
         # Σ: Vector with the singular values, sorted in descending order
         # Vᵀ: Unitary array (Conjugate transpose); eigenvectors of SᵀS
         U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
-        UR = numpy.dot(U.T, y)
 
-        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ɑ ** 2))).dot(UR)
+        # numpy.diag: Extract a diagonal
+        # w = V·diag(Σ/(Σ² + ɑ²))·Uᵀ·y
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ɑ ** 2))).dot(U.T.dot(y))
 
         return w.reshape(1, -1)
