@@ -36,6 +36,7 @@ class DataUtility:
 
         return numpy.mean(abs_errors) * 100
 
+    # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
     def load_data(csv_file: str) -> DataSet:
         column_to_predict = 'median_house_value'
