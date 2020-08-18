@@ -23,6 +23,8 @@ from LinearRegression.RidgeRegression.svd import SVD
 from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
+labels = ["Cholesky", "SVD", "LSQR"]
+
 
 def doPrediction(data: DataSet, normalize: bool, tabulateOutput) -> DataElaboration:
     R = DataElaboration([], [], [], [], [], [], [])
@@ -60,16 +62,14 @@ def doPrediction(data: DataSet, normalize: bool, tabulateOutput) -> DataElaborat
 
         R.alphas.append(ɑ)
 
-        tabulateOutput.append([normalize, "Cholesky", ɑ, mape_cholesky, r2_cholesky])
-        tabulateOutput.append([normalize, "SVD", ɑ, mape_svd, r2_svd])
-        tabulateOutput.append([normalize, "LSQR", ɑ, mape_lsqr, r2_lsqr])
+        tabulateOutput.append([normalize, labels[0], ɑ, mape_cholesky, r2_cholesky])
+        tabulateOutput.append([normalize, labels[1], ɑ, mape_svd, r2_svd])
+        tabulateOutput.append([normalize, labels[2], ɑ, mape_lsqr, r2_lsqr])
 
     return R
 
 
 def execute(data: DataSet, tabulateOutput):
-    labels = ["Cholesky", "SVD", "LSQR"]
-
     for normalize in [True, False]:
         P = doPrediction(data=data, normalize=normalize, tabulateOutput=tabulateOutput)
 
