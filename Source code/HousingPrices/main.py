@@ -71,8 +71,9 @@ def execute(data: DataSet, tabulateOutput):
     labels = ["Cholesky", "SVD", "LSQR"]
 
     for normalize in [True, False]:
-        # plt.style.use('grayscale')
+        P = doPrediction(data=data, normalize=normalize, tabulateOutput=tabulateOutput)
 
+        # plt.style.use('grayscale')
         fig, (ax1, ax2) = plt.subplots(1, 2)
         fig.suptitle(f"Normalization: {normalize}")
         fig.canvas.set_window_title('Ridge regression')
@@ -84,8 +85,6 @@ def execute(data: DataSet, tabulateOutput):
         ax1.set_ylabel("MAPE")
         ax2.set_xlabel("Alpha")
         ax2.set_ylabel("R²")
-
-        P = doPrediction(data=data, normalize=normalize, tabulateOutput=tabulateOutput)
 
         ax1.plot(P.alphas, P.mapes_cholesky, label=labels[0])
         ax1.plot(P.alphas, P.mapes_svd, label=labels[1])
