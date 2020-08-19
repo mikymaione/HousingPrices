@@ -10,20 +10,28 @@ import numpy
 
 from dataclasses import dataclass
 
+from typing import List
+
+
+@dataclass
+class ElaborationResult:
+    mape: numpy.float64
+    r2: numpy.float64
+    y_predict: numpy.ndarray
 
 @dataclass
 class DataElaboration:
     num_set: int
 
-    alphas: list
+    alphas: List[float]
 
-    mapes_cholesky: list
-    mapes_svd: list
-    mapes_lsqr: list
+    mapes_cholesky: List[numpy.float64]
+    mapes_svd: List[numpy.float64]
+    mapes_lsqr: List[numpy.float64]
 
-    r2s_cholesky: list
-    r2s_svd: list
-    r2s_lsqr: list
+    r2s_cholesky: List[numpy.float64]
+    r2s_svd: List[numpy.float64]
+    r2s_lsqr: List[numpy.float64]
 
     normalized: bool
 

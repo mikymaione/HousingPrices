@@ -13,7 +13,9 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
+import numpy
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 
 from tabulate import tabulate
 
@@ -32,26 +34,43 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
     svd_ = SVD()
     lsqr_ = LSQR()
 
-    mape_cholesky, r2_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize,
-                                                      x_test=data.x_test, y_test=data.y_test)
-    mape_svd, r2_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
-                                       y_test=data.y_test)
-    mape_lsqr, r2_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
-                                          y_test=data.y_test)
+    R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
+                                      y_test=data.y_test)
+    R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
+                            y_test=data.y_test)
+    R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
+                              y_test=data.y_test)
 
-    R.mapes_cholesky.append(mape_cholesky)
-    R.mapes_svd.append(mape_svd)
-    R.mapes_lsqr.append(mape_lsqr)
+    R.mapes_cholesky.append(R_cholesky.mape)
+    R.mapes_svd.append(R_svd.mape)
+    R.mapes_lsqr.append(R_lsqr.mape)
 
-    R.r2s_cholesky.append(r2_cholesky)
-    R.r2s_svd.append(r2_svd)
-    R.r2s_lsqr.append(r2_lsqr)
+    R.r2s_cholesky.append(R_cholesky.r2)
+    R.r2s_svd.append(R_svd.r2)
+    R.r2s_lsqr.append(R_lsqr.r2)
 
     R.alphas.append(ɑ)
 
-    tabulateOutput.append([normalize, labels[0], ɑ, mape_cholesky, r2_cholesky])
-    tabulateOutput.append([normalize, labels[1], ɑ, mape_svd, r2_svd])
-    tabulateOutput.append([normalize, labels[2], ɑ, mape_lsqr, r2_lsqr])
+    tabulateOutput.append([normalize, labels[0], ɑ, R_cholesky.mape, R_cholesky.r2])
+    tabulateOutput.append([normalize, labels[1], ɑ, R_svd.mape, R_svd.r2])
+    tabulateOutput.append([normalize, labels[2], ɑ, R_lsqr.mape, R_lsqr.r2])
+
+
+def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray) -> None:
+    fig, ax = plt.subplots()
+    fig.suptitle(plotTitle)
+    fig.canvas.set_window_title(plotTitle)
+
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("Real")
+
+    ax.scatter(y_predict, y_test, alpha=0.5)
+    line = mlines.Line2D([0, 1], [0, 1], color='red')
+    transform = ax.transAxes
+    line.set_transform(transform)
+    ax.add_line(line)
+
+    plt.show()
 
 
 def doPredictions(num_set: int, data: DataSet, normalize: bool, tabulateOutput) -> DataElaboration:
@@ -171,15 +190,15 @@ if __name__ == "__main__":
         svd_ = SVD()
         lsqr_ = LSQR()
 
-        mape_cholesky, r2_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train,
-                                                          ɑ=cholesky_P.best_cholesky_alpha, normalize=normalize,
-                                                          x_test=data.x_test, y_test=data.y_test, showPlot=True,
-                                                          plotTitle=f"Cholesky, Normalization: {normalize}")
-        mape_svd, r2_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=svd_P.best_svd_alpha, normalize=normalize,
-                                           x_test=data.x_test, y_test=data.y_test, showPlot=True,
-                                           plotTitle=f"SVD, Normalization: {normalize}")
-        mape_lsqr, r2_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha,
-                                              normalize=normalize, x_test=data.x_test, y_test=data.y_test,
-                                              showPlot=True, plotTitle=f"LSQR, Normalization: {normalize}")
+        R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=cholesky_P.best_cholesky_alpha,
+                                          normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+        R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=svd_P.best_svd_alpha, normalize=normalize,
+                                x_test=data.x_test, y_test=data.y_test)
+        R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha, normalize=normalize,
+                                  x_test=data.x_test, y_test=data.y_test, )
+
+        scatterPlot(f"Cholesky, Normalization: {normalize}", y_predict=R_cholesky.y_predict, y_test=data.y_test)
+        scatterPlot(f"SVD, Normalization: {normalize}", y_predict=R_svd.y_predict, y_test=data.y_test)
+        scatterPlot(f"LSQR, Normalization: {normalize}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
 
     print(tabulate(tabulateOutput, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
