@@ -13,13 +13,27 @@ from dataclasses import dataclass
 
 @dataclass
 class DataElaboration:
+    num_set: int
+
     alphas: list
+
     mapes_cholesky: list
     mapes_svd: list
     mapes_lsqr: list
+
     r2s_cholesky: list
     r2s_svd: list
     r2s_lsqr: list
+
+    normalized: bool
+
+    min_cholesky_mape: numpy.float64
+    min_svd_mape: numpy.float64
+    min_lsqr_mape: numpy.float64
+
+    best_cholesky_alpha: float
+    best_svd_alpha: float
+    best_lsqr_alpha: float
 
 
 @dataclass

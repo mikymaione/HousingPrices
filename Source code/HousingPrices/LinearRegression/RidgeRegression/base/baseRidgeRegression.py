@@ -7,11 +7,41 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 
 from sklearn import preprocessing
 
+from Utility.dataUtility import DataUtility
+
 
 class BaseRidgeRegression:
+
+    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool, x_test: numpy.ndarray,
+                   y_test: numpy.ndarray, showPlot: bool = False, plotTitle: str = ""):
+        self.elaborate(S=S, y=y, ɑ=ɑ, normalize=normalize)
+        y_predict = self.predict(x_test)
+
+        mape = DataUtility.mean_absolute_percentage_error(y_test=y_test, y_predict=y_predict)
+        r2 = DataUtility.coefficient_of_determination(y_test=y_test, y_predict=y_predict)
+
+        if showPlot:
+            fig, ax = plt.subplots()
+            fig.suptitle(plotTitle)
+            fig.canvas.set_window_title(plotTitle)
+
+            ax.set_xlabel("Predicted")
+            ax.set_ylabel("Real")
+
+            ax.scatter(y_predict, y_test, alpha=0.5)
+            line = mlines.Line2D([0, 1], [0, 1], color='red')
+            transform = ax.transAxes
+            line.set_transform(transform)
+            ax.add_line(line)
+
+            plt.show()
+
+        return mape, r2
 
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool) -> None:
         norm_L2 = 1
