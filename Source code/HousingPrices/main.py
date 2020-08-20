@@ -104,7 +104,7 @@ if __name__ == "__main__":
             P = doPredictions(i, data=data, normalize=normalize, tabulateOutput=tabulateOutput)
             predictions.append(P)
 
-        cholesky_P, svd_P, lsqr_P, ridge_sklearn_P = DataFunctions.findMinPredictions(predictions)
+        minPredictions = DataFunctions.findMinPredictions(predictions)
 
         data = datas[0]
 
@@ -113,14 +113,14 @@ if __name__ == "__main__":
         lsqr_ = LSQR()
         ridge_sklearn_ = Ridge_SKLearn()
 
-        R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=cholesky_P.best_cholesky_alpha,
+        R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_cholesky_alpha,
                                           normalize=normalize, x_test=data.x_test, y_test=data.y_test)
-        R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=svd_P.best_svd_alpha, normalize=normalize,
+        R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_svd_alpha, normalize=normalize,
                                 x_test=data.x_test, y_test=data.y_test)
-        R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha, normalize=normalize,
+        R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha, normalize=normalize,
                                   x_test=data.x_test, y_test=data.y_test, )
 
-        R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha,
+        R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha,
                                                     normalize=normalize, x_test=data.x_test, y_test=data.y_test, )
 
         Plotting.scatterPlot(f"Cholesky, Normalization: {normalize}", y_predict=R_cholesky.y_predict,

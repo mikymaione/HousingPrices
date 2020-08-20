@@ -28,35 +28,20 @@ class DataFunctions:
         return best_alpha, min_mape
 
     @staticmethod
-    def findMinPredictions(predictions: List[DataElaboration]) -> Tuple[
-        DataElaboration, DataElaboration, DataElaboration, DataElaboration]:
+    def findMinPredictions(predictions: List[DataElaboration]) -> DataElaboration:
         P0 = predictions[0]
 
-        cholesky_P = P0
-        svd_P = P0
-        lsqr_P = P0
-        ridge_sklearn_P = P0
-
-        cholesky_mape = P0.min_cholesky_mape
-        svd_mape = P0.min_svd_mape
-        lsqr_mape = P0.min_lsqr_mape
-        ridge_sklearn_mape = P0.min_ridge_sklearn_mape
-
         for P in predictions:
-            if P.min_cholesky_mape < cholesky_mape:
-                cholesky_mape = P.min_cholesky_mape
-                cholesky_P = P
+            if P.min_cholesky_mape < P0.min_cholesky_mape:
+                P0.min_cholesky_mape = P.min_cholesky_mape
 
-            if P.min_svd_mape < svd_mape:
-                svd_mape = P.min_svd_mape
-                svd_P = P
+            if P.min_svd_mape < P0.min_svd_mape:
+                P0.min_svd_mape = P.min_svd_mape
 
-            if P.min_lsqr_mape < lsqr_mape:
-                lsqr_mape = P.min_lsqr_mape
-                lsqr_P = P
+            if P.min_lsqr_mape < P0.min_lsqr_mape:
+                P0.min_lsqr_mape = P.min_lsqr_mape
 
-            if P.min_ridge_sklearn_mape < ridge_sklearn_mape:
-                ridge_sklearn_mape = P.min_ridge_sklearn_mape
-                ridge_sklearn_P = P
+            if P.min_ridge_sklearn_mape < P0.min_ridge_sklearn_mape:
+                P0.min_ridge_sklearn_mape = P.min_ridge_sklearn_mape
 
-        return cholesky_P, svd_P, lsqr_P, ridge_sklearn_P
+        return P0
