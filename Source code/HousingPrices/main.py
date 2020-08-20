@@ -13,19 +13,20 @@
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
-import numpy
-import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
-
+from typing import List
 from tabulate import tabulate
 
-from Utility.dataSet import DataSet, DataElaboration
-from Utility.dataUtility import DataUtility
+from Utility.plotting import Plotting
+from Utility.dataTypes import DataSet, DataElaboration
+from Utility.dataManager import DataManager
+from Utility.dataFunctions import DataFunctions
+
+from LinearRegression.RidgeRegression.ridge_sklearn import Ridge_SKLearn
 from LinearRegression.RidgeRegression.svd import SVD
 from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
-labels = ["Cholesky", "SVD", "LSQR"]
+labels = ["Cholesky", "SVD", "LSQR", "SKLearn"]
 
 
 # apprendi pesi tramite Ridge Regression
@@ -33,7 +34,10 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
     cholesky_ = Cholesky()
     svd_ = SVD()
     lsqr_ = LSQR()
+    ridge_sklearn_ = Ridge_SKLearn()
 
+    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize,
+                                                x_test=data.x_test, y_test=data.y_test)
     R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
                                       y_test=data.y_test)
     R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
@@ -41,10 +45,12 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
     R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
                               y_test=data.y_test)
 
+    R.mapes_ridge_sklearn.append(R_ridge_sklearn.mape)
     R.mapes_cholesky.append(R_cholesky.mape)
     R.mapes_svd.append(R_svd.mape)
     R.mapes_lsqr.append(R_lsqr.mape)
 
+    R.r2s_ridge_sklearn.append(R_ridge_sklearn.r2)
     R.r2s_cholesky.append(R_cholesky.r2)
     R.r2s_svd.append(R_svd.r2)
     R.r2s_lsqr.append(R_lsqr.r2)
@@ -54,109 +60,24 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
     tabulateOutput.append([normalize, labels[0], ɑ, R_cholesky.mape, R_cholesky.r2])
     tabulateOutput.append([normalize, labels[1], ɑ, R_svd.mape, R_svd.r2])
     tabulateOutput.append([normalize, labels[2], ɑ, R_lsqr.mape, R_lsqr.r2])
-
-
-def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray) -> None:
-    fig, ax = plt.subplots()
-    fig.suptitle(plotTitle)
-    fig.canvas.set_window_title(plotTitle)
-
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("Real")
-
-    ax.scatter(y_predict, y_test, alpha=0.5)
-    line = mlines.Line2D([0, 1], [0, 1], color='red')
-    transform = ax.transAxes
-    line.set_transform(transform)
-    ax.add_line(line)
-
-    plt.show()
+    tabulateOutput.append([normalize, labels[3], ɑ, R_ridge_sklearn.mape, R_ridge_sklearn.r2])
 
 
 def doPredictions(num_set: int, data: DataSet, normalize: bool, tabulateOutput) -> DataElaboration:
-    R = DataElaboration(num_set, [], [], [], [], [], [], [], normalize, 100, 100, 100, -1, -1, -1)
+    R = DataElaboration(num_set, normalize)
 
     for ɑ in [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
               1.1, 1.5, 2, 5, 15]:
         doPrediction(R, ɑ, data, normalize, tabulateOutput)
 
-    R.best_cholesky_alpha, R.min_cholesky_mape = findMinAlpha(R.mapes_cholesky, R.alphas)
-    R.best_svd_alpha, R.min_svd_mape = findMinAlpha(R.mapes_svd, R.alphas)
-    R.best_lsqr_alpha, R.min_lsqr_mape = findMinAlpha(R.mapes_lsqr, R.alphas)
+    R.best_cholesky_alpha, R.min_cholesky_mape = DataFunctions.findMinAlpha(R.mapes_cholesky, R.alphas)
+    R.best_svd_alpha, R.min_svd_mape = DataFunctions.findMinAlpha(R.mapes_svd, R.alphas)
+    R.best_lsqr_alpha, R.min_lsqr_mape = DataFunctions.findMinAlpha(R.mapes_lsqr, R.alphas)
+    R.best_ridge_sklearn_alpha, R.min_ridge_sklearn_mape = DataFunctions.findMinAlpha(R.mapes_ridge_sklearn, R.alphas)
+
+    # Plotting.plot_DataElaboration(f"Ridge regression, Normalization: {normalize}", labels, R)
 
     return R
-
-
-def findMinAlpha(lista, alphas):
-    best_alpha = alphas[0]
-    min_mape = lista[0]
-
-    for i in range(len(lista)):
-        if lista[i] < min_mape:
-            min_mape = lista[i]
-            best_alpha = alphas[i]
-
-    return best_alpha, min_mape
-
-
-def findMinPredictions(predictions):
-    P0 = predictions[0]
-
-    for P in predictions:
-        P0 = P
-        break
-
-    cholesky_P = P0
-    svd_P = P0
-    lsqr_P = P0
-
-    cholesky_mape = P0.min_cholesky_mape
-    svd_mape = P0.min_svd_mape
-    lsqr_mape = P0.min_lsqr_mape
-
-    for P in predictions:
-        if P.min_cholesky_mape < cholesky_mape:
-            cholesky_mape = P.min_cholesky_mape
-            cholesky_P = P
-
-    for P in predictions:
-        if P.min_svd_mape < svd_mape:
-            svd_mape = P.min_svd_mape
-            svd_P = P
-
-    for P in predictions:
-        if P.min_lsqr_mape < lsqr_mape:
-            lsqr_mape = P.min_lsqr_mape
-            lsqr_P = P
-
-    return cholesky_P, svd_P, lsqr_P
-
-
-def plot_DataElaboration(titolo: str, P: DataElaboration) -> None:
-    # plt.style.use('grayscale')
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.suptitle(f"Normalization: {P.normalized}")
-    fig.canvas.set_window_title(titolo)
-
-    ax1.set_title("MAPE")
-    ax2.set_title("R²")
-
-    ax1.set_xlabel("Alpha")
-    ax1.set_ylabel("MAPE")
-    ax2.set_xlabel("Alpha")
-    ax2.set_ylabel("R²")
-
-    ax1.plot(P.alphas, P.mapes_cholesky, label=labels[0])
-    ax1.plot(P.alphas, P.mapes_svd, label=labels[1])
-    ax1.plot(P.alphas, P.mapes_lsqr, label=labels[2])
-
-    ax2.plot(P.alphas, P.r2s_cholesky, label=labels[0])
-    ax2.plot(P.alphas, P.r2s_svd, label=labels[1])
-    ax2.plot(P.alphas, P.r2s_lsqr, label=labels[2])
-
-    ax1.legend()
-    ax2.legend()
-    plt.show()
 
 
 if __name__ == "__main__":
@@ -170,25 +91,27 @@ if __name__ == "__main__":
     numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population",
                         "households", "median_income"]
     # carica i dati
-    cv_datas = DataUtility.load_data("cal-housing.csv", True, column_to_predict, categories_columns, numerics_columns)
-    datas = DataUtility.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
+    cv_datas = DataManager.load_data("cal-housing.csv", True, column_to_predict, categories_columns, numerics_columns)
+    datas = DataManager.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
 
     tabulateOutput = []
 
     for normalize in [True, False]:
-        predictions = []
+        predictions: List[DataElaboration] = []
 
         for i in range(len(cv_datas)):
             data = cv_datas[i]
             P = doPredictions(i, data=data, normalize=normalize, tabulateOutput=tabulateOutput)
             predictions.append(P)
 
-        cholesky_P, svd_P, lsqr_P = findMinPredictions(predictions)
+        cholesky_P, svd_P, lsqr_P, ridge_sklearn_P = DataFunctions.findMinPredictions(predictions)
 
         data = datas[0]
+
         cholesky_ = Cholesky()
         svd_ = SVD()
         lsqr_ = LSQR()
+        ridge_sklearn_ = Ridge_SKLearn()
 
         R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=cholesky_P.best_cholesky_alpha,
                                           normalize=normalize, x_test=data.x_test, y_test=data.y_test)
@@ -197,8 +120,14 @@ if __name__ == "__main__":
         R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha, normalize=normalize,
                                   x_test=data.x_test, y_test=data.y_test, )
 
-        scatterPlot(f"Cholesky, Normalization: {normalize}", y_predict=R_cholesky.y_predict, y_test=data.y_test)
-        scatterPlot(f"SVD, Normalization: {normalize}", y_predict=R_svd.y_predict, y_test=data.y_test)
-        scatterPlot(f"LSQR, Normalization: {normalize}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
+        R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=lsqr_P.best_lsqr_alpha,
+                                                    normalize=normalize, x_test=data.x_test, y_test=data.y_test, )
+
+        Plotting.scatterPlot(f"Cholesky, Normalization: {normalize}", y_predict=R_cholesky.y_predict,
+                             y_test=data.y_test)
+        Plotting.scatterPlot(f"SVD, Normalization: {normalize}", y_predict=R_svd.y_predict, y_test=data.y_test)
+        Plotting.scatterPlot(f"LSQR, Normalization: {normalize}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
+        Plotting.scatterPlot(f"SKLearn, Normalization: {normalize}", y_predict=R_ridge_sklearn.y_predict,
+                             y_test=data.y_test)
 
     print(tabulate(tabulateOutput, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))

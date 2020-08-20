@@ -10,8 +10,8 @@ import numpy
 
 from sklearn import preprocessing
 
-from Utility.dataUtility import DataUtility
-from Utility.dataSet import ElaborationResult
+from Utility.dataManager import DataManager
+from Utility.dataTypes import ElaborationResult
 
 
 class BaseRidgeRegression:
@@ -21,8 +21,8 @@ class BaseRidgeRegression:
         self.elaborate(S=S, y=y, ɑ=ɑ, normalize=normalize)
         R = ElaborationResult(0, 0, self.predict(x_test))
 
-        R.mape = DataUtility.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
-        R.r2 = DataUtility.coefficient_of_determination(y_test=y_test, y_predict=R.y_predict)
+        R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
+        R.r2 = DataManager.coefficient_of_determination(y_test=y_test, y_predict=R.y_predict)
 
         return R
 

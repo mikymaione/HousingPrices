@@ -13,10 +13,10 @@ from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import StandardScaler
 from typing import List
 
-from Utility.dataSet import DataSet
+from Utility.dataTypes import DataSet
 
 
-class DataUtility:
+class DataManager:
 
     # https://en.wikipedia.org/wiki/Coefficient_of_determination
     @staticmethod
@@ -54,7 +54,7 @@ class DataUtility:
                 data_frame[c].fillna(value=m, inplace=True)
 
         # genera le colonne per ogni elemento di una colonna categoria
-        columns_categories = DataUtility.__categories_to_columns(
+        columns_categories = DataManager.__categories_to_columns(
             data_frame=data_frame,
             categories_columns=categories_columns)
 
@@ -83,13 +83,13 @@ class DataUtility:
                 y_train, y_test = y[train_index], y[test_index]
 
                 datasets.append(
-                    DataUtility.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+                    DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
         else:
             # Split arrays or matrices into random train and test subsets
             x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
             datasets.append(
-                DataUtility.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+                DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
 
         return datasets
 

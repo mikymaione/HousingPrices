@@ -7,46 +7,16 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+from sklearn.linear_model import Ridge
 
-from dataclasses import dataclass
-
-from typing import List
-
-
-@dataclass
-class ElaborationResult:
-    mape: numpy.float64
-    r2: numpy.float64
-    y_predict: numpy.ndarray
-
-@dataclass
-class DataElaboration:
-    num_set: int
-
-    alphas: List[float]
-
-    mapes_cholesky: List[numpy.float64]
-    mapes_svd: List[numpy.float64]
-    mapes_lsqr: List[numpy.float64]
-
-    r2s_cholesky: List[numpy.float64]
-    r2s_svd: List[numpy.float64]
-    r2s_lsqr: List[numpy.float64]
-
-    normalized: bool
-
-    min_cholesky_mape: numpy.float64
-    min_svd_mape: numpy.float64
-    min_lsqr_mape: numpy.float64
-
-    best_cholesky_alpha: float
-    best_svd_alpha: float
-    best_lsqr_alpha: float
+from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeRegression
 
 
-@dataclass
-class DataSet:
-    x_train: numpy.ndarray
-    x_test: numpy.ndarray
-    y_train: numpy.ndarray
-    y_test: numpy.ndarray
+class Ridge_SKLearn(BaseRidgeRegression):
+
+    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool) -> None:
+        self.ridge = Ridge(ɑ, False, normalize)
+        self.ridge.fit(S, y)
+
+    def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
+        return self.ridge.predict(x_test).reshape(1, -1)
