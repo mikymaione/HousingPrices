@@ -15,6 +15,8 @@ from typing import List
 
 from Utility.dataTypes import DataSet
 
+shuffleDataSet = True
+
 
 class DataManager:
 
@@ -73,7 +75,7 @@ class DataManager:
             # Provides train/test indices to split data in train/test sets.
             # Split dataset into k consecutive folds (without shuffling by default).
             # Each fold is then used once as a validation while the k - 1 remaining folds form the training set.
-            kf = KFold(n_splits=6, shuffle=False)
+            kf = KFold(n_splits=6, shuffle=shuffleDataSet)
 
             for train_index, test_index in kf.split(X):
                 x_train, x_test = X[train_index], X[test_index]
@@ -82,7 +84,7 @@ class DataManager:
                 datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
         else:
             # Split arrays or matrices into random train and test subsets
-            x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+            x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=shuffleDataSet)
 
             datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
 
