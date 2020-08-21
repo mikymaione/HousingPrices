@@ -14,8 +14,8 @@ from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeR
 
 class Ridge_SKLearn(BaseRidgeRegression):
 
-    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool) -> None:
-        self.ridge = Ridge(ɑ, True, normalize)
+    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
+        self.ridge = Ridge(ɑ, True, True)
         self.ridge.fit(S, y)
 
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:

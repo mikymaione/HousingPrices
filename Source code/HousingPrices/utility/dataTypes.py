@@ -15,15 +15,14 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ElaborationResult:
-    mape: numpy.float64
-    r2: numpy.float64
     y_predict: numpy.ndarray
+    mape: numpy.float64 = 0
+    r2: numpy.float64 = 0
 
 
 @dataclass
 class DataElaboration:
     num_set: int
-    normalized: bool
 
     alphas: List[float] = field(default_factory=list)
 

@@ -16,16 +16,16 @@ from Utility.dataTypes import ElaborationResult
 
 class BaseRidgeRegression:
 
-    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
-        self.elaborate(S=S, y=y, ɑ=ɑ, normalize=normalize)
-        R = ElaborationResult(0, 0, self.predict(x_test))
+    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
+        self.elaborate(S=S, y=y, ɑ=ɑ)
+        R = ElaborationResult(self.predict(x_test))
 
         R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
         R.r2 = DataManager.coefficient_of_determination(y_test=y_test, y_predict=R.y_predict)
 
         return R
 
-    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool) -> None:
+    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
         norm_L2 = 1
         y = y.reshape(-1, 1)
 
@@ -36,12 +36,11 @@ class BaseRidgeRegression:
         S = S - S_wam
         y = y - y_wam
 
-        if normalize:
-            # Normalization is the process of scaling individual samples to have unit norm.
-            # This process can be useful if you plan to use a quadratic form such as the dot-product or any other kernel to quantify the similarity of any pair of samples.
-            # This assumption is the base of the Vector Space Model often used in text classification and clustering contexts.
-            # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
-            S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
+        # Normalization is the process of scaling individual samples to have unit norm.
+        # This process can be useful if you plan to use a quadratic form such as the dot-product or any other kernel to quantify the similarity of any pair of samples.
+        # This assumption is the base of the Vector Space Model often used in text classification and clustering contexts.
+        # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
+        S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
         self.w = self.calculateWeights(S, y, ɑ) / norm_L2
         self.intercetta = y_wam - S_wam.dot(self.w.T)

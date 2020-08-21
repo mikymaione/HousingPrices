@@ -20,7 +20,7 @@ class Plotting:
     def plot_DataElaboration(titolo: str, labels: List[str], P: DataElaboration) -> None:
         # plt.style.use('grayscale')
         fig, (ax1, ax2) = plt.subplots(1, 2)
-        fig.suptitle(f"Normalization: {P.normalized}")
+        fig.suptitle(titolo)
         fig.canvas.set_window_title(titolo)
 
         ax1.set_title("MAPE")
