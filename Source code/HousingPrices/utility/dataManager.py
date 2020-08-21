@@ -94,7 +94,8 @@ class DataManager:
         return datasets
 
     @staticmethod
-    def __to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns) -> DataSet:
+    def __to_DataSet(x_train: numpy.ndarray, x_test: numpy.ndarray, y_train: numpy.ndarray, y_test: numpy.ndarray,
+                     columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
         # aggiunti titoli a colonne
         x_train = pandas.DataFrame(x_train, columns=columns_to_use)
         x_test = pandas.DataFrame(x_test, columns=columns_to_use)
