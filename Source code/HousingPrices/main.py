@@ -27,6 +27,10 @@ from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
 labels = ["Cholesky", "SVD", "LSQR", "SKLearn"]
+column_to_predict = 'median_house_value'
+categories_columns = ['ocean_proximity']
+numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population", "households", "median_income"]
+alphas = [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.5, 2, 5, 15, 17]
 
 
 # apprendi pesi tramite Ridge Regression
@@ -36,14 +40,10 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
     lsqr_ = LSQR()
     ridge_sklearn_ = Ridge_SKLearn()
 
-    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize,
-                                                x_test=data.x_test, y_test=data.y_test)
-    R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
-                                      y_test=data.y_test)
-    R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
-                            y_test=data.y_test)
-    R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test,
-                              y_test=data.y_test)
+    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
 
     R.mapes_ridge_sklearn.append(R_ridge_sklearn.mape)
     R.mapes_cholesky.append(R_cholesky.mape)
@@ -66,8 +66,7 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, normalize: bool, 
 def doPredictions(num_set: int, data: DataSet, normalize: bool, tabulateOutput) -> DataElaboration:
     R = DataElaboration(num_set, normalize)
 
-    for ɑ in [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
-              1.1, 1.5, 2, 5, 15]:
+    for ɑ in alphas:
         doPrediction(R, ɑ, data, normalize, tabulateOutput)
 
     R.best_cholesky_alpha, R.min_cholesky_mape = DataFunctions.findMinAlpha(R.mapes_cholesky, R.alphas)
@@ -80,16 +79,7 @@ def doPredictions(num_set: int, data: DataSet, normalize: bool, tabulateOutput) 
     return R
 
 
-if __name__ == "__main__":
-    print("HousingPrices Project")
-    print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
-    print("")
-    print("Elaborating...")
-
-    column_to_predict = 'median_house_value'
-    categories_columns = ['ocean_proximity']
-    numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population",
-                        "households", "median_income"]
+def executeCrossValidation() -> None:
     # carica i dati
     cv_datas = DataManager.load_data("cal-housing.csv", True, column_to_predict, categories_columns, numerics_columns)
     datas = DataManager.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
@@ -106,28 +96,51 @@ if __name__ == "__main__":
 
         minPredictions = DataFunctions.findMinPredictions(predictions)
 
-        data = datas[0]
-
-        cholesky_ = Cholesky()
-        svd_ = SVD()
-        lsqr_ = LSQR()
-        ridge_sklearn_ = Ridge_SKLearn()
-
-        R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_cholesky_alpha,
-                                          normalize=normalize, x_test=data.x_test, y_test=data.y_test)
-        R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_svd_alpha, normalize=normalize,
-                                x_test=data.x_test, y_test=data.y_test)
-        R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha, normalize=normalize,
-                                  x_test=data.x_test, y_test=data.y_test, )
-
-        R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha,
-                                                    normalize=normalize, x_test=data.x_test, y_test=data.y_test, )
-
-        Plotting.scatterPlot(f"Cholesky, Normalization: {normalize}", y_predict=R_cholesky.y_predict,
-                             y_test=data.y_test)
-        Plotting.scatterPlot(f"SVD, Normalization: {normalize}", y_predict=R_svd.y_predict, y_test=data.y_test)
-        Plotting.scatterPlot(f"LSQR, Normalization: {normalize}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
-        Plotting.scatterPlot(f"SKLearn, Normalization: {normalize}", y_predict=R_ridge_sklearn.y_predict,
-                             y_test=data.y_test)
+        executeOnMinPrediction(datas[0], normalize, minPredictions)
 
     print(tabulate(tabulateOutput, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
+
+
+def executeOnRangeOfAlpha() -> None:
+    # carica i dati
+    datas = DataManager.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
+    data = datas[0]
+
+    tabulateOutput = []
+
+    for normalize in [True, False]:
+        P = doPredictions(0, data, normalize, tabulateOutput)
+
+        Plotting.plot_DataElaboration(f"Normalization: {normalize}", labels, P)
+
+        minPredictions = DataFunctions.findMinPredictions([P])
+        executeOnMinPrediction(data, normalize, minPredictions)
+
+    print(tabulate(tabulateOutput, headers=["Normalized", "Algo.", "ɑ", "MAPE", "R²"]))
+
+
+def executeOnMinPrediction(data: DataSet, normalize: bool, minPredictions: DataElaboration):
+    cholesky_ = Cholesky()
+    svd_ = SVD()
+    lsqr_ = LSQR()
+    ridge_sklearn_ = Ridge_SKLearn()
+
+    R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_cholesky_alpha, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_svd_alpha, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, ɑ=minPredictions.best_lsqr_alpha, normalize=normalize, x_test=data.x_test, y_test=data.y_test)
+
+    Plotting.scatterPlot(f"Cholesky, Normalization: {normalize}, ɑ: {minPredictions.best_cholesky_alpha}", y_predict=R_cholesky.y_predict, y_test=data.y_test)
+    Plotting.scatterPlot(f"SVD, Normalization: {normalize}, ɑ: {minPredictions.best_svd_alpha}", y_predict=R_svd.y_predict, y_test=data.y_test)
+    Plotting.scatterPlot(f"LSQR, Normalization: {normalize}, ɑ: {minPredictions.best_lsqr_alpha}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
+    Plotting.scatterPlot(f"SKLearn, Normalization: {normalize}, ɑ: {minPredictions.best_ridge_sklearn_alpha}", y_predict=R_ridge_sklearn.y_predict, y_test=data.y_test)
+
+
+if __name__ == "__main__":
+    print("HousingPrices Project")
+    print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
+    print("")
+    print("Elaborating...")
+
+    executeOnRangeOfAlpha()
+    # executeCrossValidation()

@@ -38,8 +38,7 @@ class DataManager:
 
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
-    def load_data(csv_file: str, use_cross_validation: bool, column_to_predict: str, categories_columns: List[str],
-                  numerics_columns: List[str]) -> List[DataSet]:
+    def load_data(csv_file: str, use_cross_validation: bool, column_to_predict: str, categories_columns: List[str], numerics_columns: List[str]) -> List[DataSet]:
 
         # shuffled datasets
         datasets: List[DataSet] = []
@@ -54,9 +53,7 @@ class DataManager:
                 data_frame[c].fillna(value=m, inplace=True)
 
         # genera le colonne per ogni elemento di una colonna categoria
-        columns_categories = DataManager.__categories_to_columns(
-            data_frame=data_frame,
-            categories_columns=categories_columns)
+        columns_categories = DataManager.__categories_to_columns(data_frame=data_frame, categories_columns=categories_columns)
 
         # elimina le colonne categoria
         data_frame.drop(columns=categories_columns, inplace=True)
@@ -82,20 +79,17 @@ class DataManager:
                 x_train, x_test = X[train_index], X[test_index]
                 y_train, y_test = y[train_index], y[test_index]
 
-                datasets.append(
-                    DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+                datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
         else:
             # Split arrays or matrices into random train and test subsets
             x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-            datasets.append(
-                DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+            datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
 
         return datasets
 
     @staticmethod
-    def __to_DataSet(x_train: numpy.ndarray, x_test: numpy.ndarray, y_train: numpy.ndarray, y_test: numpy.ndarray,
-                     columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
+    def __to_DataSet(x_train: numpy.ndarray, x_test: numpy.ndarray, y_train: numpy.ndarray, y_test: numpy.ndarray, columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
         # aggiunti titoli a colonne
         x_train = pandas.DataFrame(x_train, columns=columns_to_use)
         x_test = pandas.DataFrame(x_test, columns=columns_to_use)

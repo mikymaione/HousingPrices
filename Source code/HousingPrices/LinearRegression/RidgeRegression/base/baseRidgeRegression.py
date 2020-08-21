@@ -16,8 +16,7 @@ from Utility.dataTypes import ElaborationResult
 
 class BaseRidgeRegression:
 
-    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool, x_test: numpy.ndarray,
-                   y_test: numpy.ndarray) -> ElaborationResult:
+    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, normalize: bool, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
         self.elaborate(S=S, y=y, ɑ=ɑ, normalize=normalize)
         R = ElaborationResult(0, 0, self.predict(x_test))
 
