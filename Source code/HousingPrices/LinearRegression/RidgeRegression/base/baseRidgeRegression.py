@@ -26,7 +26,6 @@ class BaseRidgeRegression:
         return R
 
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
-        norm_L2 = 1
         y = y.reshape(-1, 1)
 
         # Compute the weighted arithmetic mean along the specified axis.

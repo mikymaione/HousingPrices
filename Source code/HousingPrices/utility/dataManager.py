@@ -76,7 +76,7 @@ class DataManager:
 
         if showInfo:
             corr = data_frame.corr()
-            seaborn.heatmap(corr, annot=True)
+            seaborn.heatmap(corr, square=True, annot=True)
             plt.title('Correlation between features')
 
             j = corr[((corr > 0.75) | (corr < -0.75)) & (corr != 1.0)].dropna(axis='index', how='all')
@@ -89,8 +89,8 @@ class DataManager:
             if numerics_columns.count(u) > 0:
                 numerics_columns.remove(u)
 
-        X = data_frame.drop(columns=['households', 'total_bedrooms', column_to_predict]).values
-        y = data_frame[column_to_predict].values
+        X = data_frame.drop(columns=['households', 'total_bedrooms', column_to_predict])
+        y = data_frame[column_to_predict]
 
         # dividi in X e y, sia di train che test
         if use_cross_validation:
@@ -114,11 +114,7 @@ class DataManager:
         return datasets
 
     @staticmethod
-    def __to_DataSet(x_train: numpy.ndarray, x_test: numpy.ndarray, y_train: numpy.ndarray, y_test: numpy.ndarray, columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
-        # aggiunti titoli a colonne
-        x_train = pandas.DataFrame(x_train, columns=columns_to_use)
-        x_test = pandas.DataFrame(x_test, columns=columns_to_use)
-
+    def __to_DataSet(x_train: pandas.DataFrame, x_test: pandas.DataFrame, y_train: pandas.Series, y_test: pandas.Series, columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
         # Standardize features by removing the mean and scaling to unit variance
         # The standard score of a sample X is calculated as:
         # z = (X - μ) / σ²
@@ -133,8 +129,8 @@ class DataManager:
         return DataSet(
             x_train=x_train,
             x_test=x_test.to_numpy(),
-            y_train=y_train,
-            y_test=y_test
+            y_train=y_train.to_numpy(),
+            y_test=y_test.to_numpy()
         )
 
     @staticmethod
