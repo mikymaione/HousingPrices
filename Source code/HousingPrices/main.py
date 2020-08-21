@@ -27,9 +27,6 @@ from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
 labels = ["Cholesky", "SVD", "LSQR", "SKLearn"]
-column_to_predict = 'median_house_value'
-categories_columns = ['ocean_proximity']
-numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population", "households", "median_income"]
 alphas = [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.5, 2, 5, 15, 17]
 
 
@@ -81,8 +78,8 @@ def doPredictions(num_set: int, data: DataSet, normalize: bool, tabulateOutput) 
 
 def executeCrossValidation() -> None:
     # carica i dati
-    cv_datas = DataManager.load_data("cal-housing.csv", True, column_to_predict, categories_columns, numerics_columns)
-    datas = DataManager.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
+    cv_datas = DataManager.load_data("cal-housing.csv", True)
+    datas = DataManager.load_data("cal-housing.csv", False)
 
     tabulateOutput = []
 
@@ -103,7 +100,7 @@ def executeCrossValidation() -> None:
 
 def executeOnRangeOfAlpha() -> None:
     # carica i dati
-    datas = DataManager.load_data("cal-housing.csv", False, column_to_predict, categories_columns, numerics_columns)
+    datas = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
     tabulateOutput = []

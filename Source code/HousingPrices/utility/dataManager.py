@@ -8,6 +8,8 @@
 
 import numpy
 import pandas
+import seaborn
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -16,6 +18,9 @@ from typing import List
 from Utility.dataTypes import DataSet
 
 shuffleDataSet = True
+column_to_predict = 'median_house_value'
+categories_columns = ['ocean_proximity']
+numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population", "households", "median_income"]
 
 
 class DataManager:
@@ -40,13 +45,19 @@ class DataManager:
 
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
-    def load_data(csv_file: str, use_cross_validation: bool, column_to_predict: str, categories_columns: List[str], numerics_columns: List[str]) -> List[DataSet]:
-
+    def load_data(csv_file: str, use_cross_validation: bool, showInfo: bool = True) -> List[DataSet]:
         # shuffled datasets
         datasets: List[DataSet] = []
 
         # leggi tutto il file
         data_frame = pandas.read_csv(filepath_or_buffer=csv_file)
+
+        if showInfo:
+            print(data_frame.info())
+            print(data_frame.describe())
+            print(data_frame.head())
+
+            seaborn.distplot(data_frame[column_to_predict])
 
         # metti media in celle vuote
         for c in data_frame.columns:
@@ -63,11 +74,23 @@ class DataManager:
         # aggiungi le colonne per ogni elemento di una colonna categoria
         data_frame = pandas.concat([data_frame, columns_categories], axis=1)
 
-        columns_to_use = list(data_frame.columns)
-        columns_to_use.remove(column_to_predict)
+        if showInfo:
+            corr = data_frame.corr()
+            seaborn.heatmap(corr, annot=True)
+            plt.title('Correlation between features')
 
-        X = data_frame[columns_to_use].to_numpy()
-        y = data_frame[column_to_predict].to_numpy()
+            j = corr[((corr > 0.75) | (corr < -0.75)) & (corr != 1.0)].dropna(axis='index', how='all')
+            print(j)
+
+        columns_to_use = list(data_frame.columns)
+
+        for u in ['households', 'total_bedrooms', column_to_predict]:
+            columns_to_use.remove(u)
+            if numerics_columns.count(u) > 0:
+                numerics_columns.remove(u)
+
+        X = data_frame.drop(columns=['households', 'total_bedrooms', column_to_predict]).values
+        y = data_frame[column_to_predict].values
 
         # dividi in X e y, sia di train che test
         if use_cross_validation:
