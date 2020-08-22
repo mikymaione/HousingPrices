@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ElaborationResult:
+    w: numpy.ndarray
     y_predict: numpy.ndarray
     mape: numpy.float64 = 0
     r2: numpy.float64 = 0
@@ -25,6 +26,11 @@ class DataElaboration:
     num_set: int
 
     alphas: List[float] = field(default_factory=list)
+
+    w_ridge_sklearn: List[numpy.ndarray] = field(default_factory=list)
+    w_cholesky: List[numpy.ndarray] = field(default_factory=list)
+    w_svd: List[numpy.ndarray] = field(default_factory=list)
+    w_lsqr: List[numpy.ndarray] = field(default_factory=list)
 
     mapes_ridge_sklearn: List[numpy.float64] = field(default_factory=list)
     mapes_cholesky: List[numpy.float64] = field(default_factory=list)

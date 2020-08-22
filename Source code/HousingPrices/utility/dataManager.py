@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import StandardScaler
-from typing import List
+from sklearn import decomposition
+from typing import List, Tuple
 
 from Utility.dataTypes import DataSet
 
@@ -45,7 +46,7 @@ class DataManager:
 
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
-    def load_data(csv_file: str, use_cross_validation: bool, showInfo: bool = True) -> List[DataSet]:
+    def load_data(csv_file: str, use_cross_validation: bool, usePCA: bool = False, showInfo: bool = False) -> Tuple[List[DataSet], pandas.DataFrame]:
         # shuffled datasets
         datasets: List[DataSet] = []
 
@@ -92,6 +93,9 @@ class DataManager:
         X = data_frame.drop(columns=['households', 'total_bedrooms', column_to_predict])
         y = data_frame[column_to_predict]
 
+        if usePCA:
+            X = DataManager.getPCA(X)
+
         # dividi in X e y, sia di train che test
         if use_cross_validation:
             # K-Folds cross-validator
@@ -104,31 +108,61 @@ class DataManager:
                 x_train, x_test = X[train_index], X[test_index]
                 y_train, y_test = y[train_index], y[test_index]
 
-                datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+                datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, not usePCA))
         else:
             # Split arrays or matrices into random train and test subsets
             x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=shuffleDataSet)
 
-            datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, columns_to_use, numerics_columns))
+            datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, not usePCA))
 
-        return datasets
+        return datasets, X
 
     @staticmethod
-    def __to_DataSet(x_train: pandas.DataFrame, x_test: pandas.DataFrame, y_train: pandas.Series, y_test: pandas.Series, columns_to_use: List[str], numerics_columns: List[str]) -> DataSet:
-        # Standardize features by removing the mean and scaling to unit variance
-        # The standard score of a sample X is calculated as:
-        # z = (X - μ) / σ²
-        ss = StandardScaler()
-        ss.fit(X=x_train[numerics_columns])
-        x_train = ss.transform(X=x_train[numerics_columns])
+    def getPCA(X: pandas.DataFrame) -> numpy.array:
+        pca = decomposition.PCA(n_components=2)
+        pca.fit(X)
 
-        # usa (X-μ / √σ²) sul test
-        centered_df = x_test[numerics_columns] - ss.mean_
-        x_test = centered_df / (ss.var_ ** 0.5)
+        X_pca = pca.transform(X)
+
+        return X_pca
+
+    @staticmethod
+    def doPCA(X: pandas.DataFrame, coef_list: List[numpy.array]) -> None:
+        coef_matrix = numpy.array(coef_list)
+
+        pca = decomposition.PCA(n_components=2)
+        pca.fit(coef_matrix)
+        coef_pca = pca.transform(coef_matrix)
+
+        plt.scatter(coef_pca[:, 0], coef_pca[:, 1])
+        plt.show()
+
+        pca = decomposition.PCA(n_components=2)
+        pca.fit(X)
+
+        plt.title('PCA')
+        plt.plot(pca.singular_values_, label='Singular values')
+        plt.legend()
+        plt.show()
+
+    @staticmethod
+    def __to_DataSet(x_train, x_test, y_train: pandas.Series, y_test: pandas.Series, standardize: bool) -> DataSet:
+        if standardize:
+            # Standardize features by removing the mean and scaling to unit variance
+            # The standard score of a sample X is calculated as:
+            # z = (X - μ) / σ²
+            ss = StandardScaler()
+            ss.fit(X=x_train[numerics_columns])
+            x_train = ss.transform(X=x_train[numerics_columns])
+
+            # usa (X-μ / √σ²) sul test
+            centered_df = x_test[numerics_columns] - ss.mean_
+            x_test = centered_df / (ss.var_ ** 0.5)
+            x_test = x_test.to_numpy()
 
         return DataSet(
             x_train=x_train,
-            x_test=x_test.to_numpy(),
+            x_test=x_test,
             y_train=y_train.to_numpy(),
             y_test=y_test.to_numpy()
         )

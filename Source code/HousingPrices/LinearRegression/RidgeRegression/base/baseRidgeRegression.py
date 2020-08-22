@@ -15,10 +15,12 @@ from Utility.dataTypes import ElaborationResult
 
 
 class BaseRidgeRegression:
-
+    w: numpy.ndarray
+    intercetta: numpy.ndarray
+    
     def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
         self.elaborate(S=S, y=y, ɑ=ɑ)
-        R = ElaborationResult(self.predict(x_test))
+        R = ElaborationResult(self.w, self.predict(x_test))
 
         R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
         R.r2 = DataManager.coefficient_of_determination(y_test=y_test, y_predict=R.y_predict)

@@ -42,6 +42,11 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, tabulateOutput) -
     R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, x_test=data.x_test, y_test=data.y_test)
     R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, ɑ=ɑ, x_test=data.x_test, y_test=data.y_test)
 
+    R.w_ridge_sklearn.append(R_ridge_sklearn.w)
+    R.w_cholesky.append(R_cholesky.w)
+    R.w_svd.append(R_svd.w)
+    R.w_lsqr.append(R_lsqr.w)
+
     R.mapes_ridge_sklearn.append(R_ridge_sklearn.mape)
     R.mapes_cholesky.append(R_cholesky.mape)
     R.mapes_svd.append(R_svd.mape)
@@ -100,12 +105,13 @@ def executeCrossValidation() -> None:
 
 def executeOnRangeOfAlpha() -> None:
     # carica i dati
-    datas = DataManager.load_data("cal-housing.csv", False)
+    datas, X = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
     tabulateOutput = []
 
     P = doPredictions(0, data, tabulateOutput)
+    # DataManager.doPCA(X, P.w_ridge_sklearn)
 
     Plotting.plot_DataElaboration("Ridge regression", labels, P)
 

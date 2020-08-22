@@ -17,6 +17,7 @@ class Ridge_SKLearn(BaseRidgeRegression):
     def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
         self.ridge = Ridge(ɑ, True, True)
         self.ridge.fit(S, y)
+        self.w = self.ridge.coef_
 
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
         return self.ridge.predict(x_test).reshape(1, -1)
