@@ -103,6 +103,7 @@ class DataManager:
             # Split dataset into k consecutive folds (without shuffling by default).
             # Each fold is then used once as a validation while the k - 1 remaining folds form the training set.
             kf = KFold(n_splits=6, shuffle=shuffleDataSet)
+            X = X.to_numpy()
 
             for train_index, test_index in kf.split(X):
                 x_train, x_test = X[train_index], X[test_index]

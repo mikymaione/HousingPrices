@@ -9,7 +9,7 @@
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-from typing import List
+from typing import List, Tuple
 
 from Utility.dataTypes import DataElaboration
 
@@ -47,8 +47,8 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray) -> None:
-        fig, ax = plt.subplots()
+    def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray, figsize: Tuple[float, float] = None) -> None:
+        fig, ax = plt.subplots(figsize=figsize)
         fig.suptitle(plotTitle)
         fig.canvas.set_window_title(plotTitle)
 

@@ -17,9 +17,9 @@ from Utility.dataTypes import ElaborationResult
 class BaseRidgeRegression:
     w: numpy.ndarray
     intercetta: numpy.ndarray
-    
+
     def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
-        self.elaborate(S=S, y=y, ɑ=ɑ)
+        self.fit(S=S, y=y, ɑ=ɑ)
         R = ElaborationResult(self.w, self.predict(x_test))
 
         R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
@@ -27,7 +27,12 @@ class BaseRidgeRegression:
 
         return R
 
-    def elaborate(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
+    def score(self, x_test: numpy.ndarray, y_test: numpy.ndarray) -> numpy.float64:
+        y_predict = self.predict(x_test)
+
+        return DataManager.coefficient_of_determination(y_test=y_test, y_predict=y_predict)
+
+    def fit(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
         y = y.reshape(-1, 1)
 
         # Compute the weighted arithmetic mean along the specified axis.

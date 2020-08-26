@@ -144,5 +144,5 @@ if __name__ == "__main__":
     print("")
     print("Elaborating...")
 
-    executeOnRangeOfAlpha()
-    # executeCrossValidation()
+    #executeOnRangeOfAlpha()
+    executeCrossValidation()
