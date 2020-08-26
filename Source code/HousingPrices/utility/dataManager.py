@@ -108,12 +108,12 @@ class DataManager:
                 x_train, x_test = X[train_index], X[test_index]
                 y_train, y_test = y[train_index], y[test_index]
 
-                datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, not usePCA))
+                datasets.append(DataManager.toDataSet(x_train, x_test, y_train, y_test, not usePCA))
         else:
             # Split arrays or matrices into random train and test subsets
             x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=shuffleDataSet)
 
-            datasets.append(DataManager.__to_DataSet(x_train, x_test, y_train, y_test, not usePCA))
+            datasets.append(DataManager.toDataSet(x_train, x_test, y_train, y_test, not usePCA))
 
         return datasets, X
 
@@ -146,7 +146,7 @@ class DataManager:
         plt.show()
 
     @staticmethod
-    def __to_DataSet(x_train, x_test, y_train: pandas.Series, y_test: pandas.Series, standardize: bool) -> DataSet:
+    def toDataSet(x_train, x_test, y_train: pandas.Series, y_test: pandas.Series, standardize: bool) -> DataSet:
         if standardize:
             # Standardize features by removing the mean and scaling to unit variance
             # The standard score of a sample X is calculated as:
