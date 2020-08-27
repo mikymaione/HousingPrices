@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,pycharm+all,microsoftoffice
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,pycharm+all,microsoftoffice
+# Created by https://www.toptal.com/developers/gitignore/api/jupyternotebooks,python,pycharm+all,libreoffice,microsoftoffice
+# Edit at https://www.toptal.com/developers/gitignore?templates=jupyternotebooks,python,pycharm+all,libreoffice,microsoftoffice
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
@@ -15,6 +15,10 @@ ipython_config.py
 
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
+
+### LibreOffice ###
+# LibreOffice locks
+.~lock.*#
 
 ### MicrosoftOffice ###
 *.tmp
@@ -259,4 +263,4 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# End of https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,pycharm+all,microsoftoffice
+# End of https://www.toptal.com/developers/gitignore/api/jupyternotebooks,python,pycharm+all,libreoffice,microsoftoffice
