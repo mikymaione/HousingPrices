@@ -20,6 +20,7 @@ from Utility.dataTypes import ElaborationResult
 class BaseRidgeRegression(BaseEstimator):
     coef_: numpy.ndarray
     intercetta: numpy.ndarray
+    alpha: float = 1.0
 
     def __init__(self, alpha: float = 1.0):
         self.alpha = alpha
