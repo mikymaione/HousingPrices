@@ -18,7 +18,7 @@ class BaseRidgeRegression:
     w: numpy.ndarray
     intercetta: numpy.ndarray
 
-    def __init__(self, ɑ: float):
+    def __init__(self, ɑ: float = 1.0):
         self.ɑ = ɑ
 
     def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
@@ -57,7 +57,7 @@ class BaseRidgeRegression:
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
         y_predict = x_test.dot(self.w.T) + self.intercetta
 
-        return y_predict.reshape(1, -1)
+        return y_predict
 
     # abstract
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
