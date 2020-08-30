@@ -9,40 +9,59 @@
 import numpy
 
 from sklearn import preprocessing
+from sklearn.base import BaseEstimator
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.utils import check_X_y, check_array
+from sklearn.utils.validation import check_is_fitted
 
-from Utility.dataManager import DataManager
 from Utility.dataTypes import ElaborationResult
 
 
-class BaseRidgeRegression:
-    w: numpy.ndarray
+class BaseRidgeRegression(BaseEstimator):
+    coef_: numpy.ndarray
     intercetta: numpy.ndarray
 
-    def __init__(self, ɑ: float = 1.0):
-        self.ɑ = ɑ
+    def __init__(self, alpha: float = 1.0):
+        self.alpha = alpha
 
     def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
-        self.fit(S=S, y=y)
-        R = ElaborationResult(self.w, self.predict(x_test))
+        self.fit(S, y)
+        R = ElaborationResult(self.coef_, self.predict(x_test))
 
-        R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
-        R.r2 = DataManager.coefficient_of_determination(y_test=y_test, y_predict=R.y_predict)
+        R.mape = mean_squared_error(y_test, R.y_predict)
+        R.r2 = r2_score(y_test, R.y_predict)
 
         return R
 
     def score(self, x_test: numpy.ndarray, y_test: numpy.ndarray) -> numpy.float64:
         y_predict = self.predict(x_test)
 
-        return DataManager.coefficient_of_determination(y_test=y_test, y_predict=y_predict)
+        return r2_score(y_test, y_predict)
 
-    def fit(self, S: numpy.ndarray, y: numpy.ndarray) -> None:
+    def fit(self, X, y):
+        """A reference implementation of a fitting function.
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The training input samples.
+        y : array-like, shape (n_samples,) or (n_samples, n_outputs)
+            The target values (class labels in classification, real numbers in
+            regression).
+        Returns
+        -------
+        self : object
+            Returns self.
+        """
+        X, y = check_X_y(X, y, accept_sparse=True)
+        self.is_fitted_ = True
+
         y = y.reshape(-1, 1)
 
         # Compute the weighted arithmetic mean along the specified axis.
-        S_wam = numpy.average(S, axis=0)
+        S_wam = numpy.average(X, axis=0)
         y_wam = numpy.average(y, axis=0)
 
-        S = S - S_wam
+        S = X - S_wam
         y = y - y_wam
 
         # Normalization is the process of scaling individual samples to have unit norm.
@@ -51,11 +70,27 @@ class BaseRidgeRegression:
         # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
         S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
-        self.w = self.calculateWeights(S, y) / norm_L2
-        self.intercetta = y_wam - S_wam.dot(self.w.T)
+        self.coef_ = self.calculateWeights(S, y) / norm_L2
+        self.intercetta = y_wam - S_wam.dot(self.coef_.T)
 
-    def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
-        y_predict = x_test.dot(self.w.T) + self.intercetta
+        # `fit` should always return `self`
+        return self
+
+    def predict(self, X):
+        """ A reference implementation of a predicting function.
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The training input samples.
+        Returns
+        -------
+        y : ndarray, shape (n_samples,)
+            Returns an array of ones.
+        """
+        X = check_array(X, accept_sparse=True)
+        check_is_fitted(self, 'is_fitted_')
+
+        y_predict = numpy.dot(X, self.coef_.T) + self.intercetta
 
         return y_predict
 

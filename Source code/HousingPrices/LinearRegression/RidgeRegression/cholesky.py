@@ -21,7 +21,7 @@ class Cholesky(BaseRidgeRegression):
         SᵀS = S.T.dot(S)
 
         for i in range(features):
-            SᵀS[i, i] += self.ɑ
+            SᵀS[i, i] += self.alpha
 
         # Solve a linear matrix equation, or system of linear scalar equations.
         # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y

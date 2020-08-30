@@ -21,12 +21,11 @@ from Utility.dataTypes import DataSet, DataElaboration
 from Utility.dataManager import DataManager
 from Utility.dataFunctions import DataFunctions
 
-from LinearRegression.RidgeRegression.ridge_sklearn import Ridge_SKLearn
 from LinearRegression.RidgeRegression.svd import SVD
 from LinearRegression.RidgeRegression.lsqr import LSQR
 from LinearRegression.RidgeRegression.cholesky import Cholesky
 
-labels = ["Cholesky", "SVD", "LSQR", "SKLearn"]
+labels = ["Cholesky", "SVD", "LSQR"]
 alphas = [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.5, 2, 5, 15, 17]
 
 
@@ -35,24 +34,19 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, tabulateOutput) -
     cholesky_ = Cholesky(ɑ)
     svd_ = SVD(ɑ)
     lsqr_ = LSQR(ɑ)
-    ridge_sklearn_ = Ridge_SKLearn(ɑ)
 
-    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
 
-    R.w_ridge_sklearn.append(R_ridge_sklearn.w)
     R.w_cholesky.append(R_cholesky.w)
     R.w_svd.append(R_svd.w)
     R.w_lsqr.append(R_lsqr.w)
 
-    R.mapes_ridge_sklearn.append(R_ridge_sklearn.mape)
     R.mapes_cholesky.append(R_cholesky.mape)
     R.mapes_svd.append(R_svd.mape)
     R.mapes_lsqr.append(R_lsqr.mape)
 
-    R.r2s_ridge_sklearn.append(R_ridge_sklearn.r2)
     R.r2s_cholesky.append(R_cholesky.r2)
     R.r2s_svd.append(R_svd.r2)
     R.r2s_lsqr.append(R_lsqr.r2)
@@ -62,7 +56,6 @@ def doPrediction(R: DataElaboration, ɑ: float, data: DataSet, tabulateOutput) -
     tabulateOutput.append([labels[0], ɑ, R_cholesky.mape, R_cholesky.r2])
     tabulateOutput.append([labels[1], ɑ, R_svd.mape, R_svd.r2])
     tabulateOutput.append([labels[2], ɑ, R_lsqr.mape, R_lsqr.r2])
-    tabulateOutput.append([labels[3], ɑ, R_ridge_sklearn.mape, R_ridge_sklearn.r2])
 
 
 def doPredictions(num_set: int, data: DataSet, tabulateOutput) -> DataElaboration:
@@ -74,7 +67,6 @@ def doPredictions(num_set: int, data: DataSet, tabulateOutput) -> DataElaboratio
     R.best_cholesky_alpha, R.min_cholesky_mape = DataFunctions.findMinAlpha(R.mapes_cholesky, R.alphas)
     R.best_svd_alpha, R.min_svd_mape = DataFunctions.findMinAlpha(R.mapes_svd, R.alphas)
     R.best_lsqr_alpha, R.min_lsqr_mape = DataFunctions.findMinAlpha(R.mapes_lsqr, R.alphas)
-    R.best_ridge_sklearn_alpha, R.min_ridge_sklearn_mape = DataFunctions.findMinAlpha(R.mapes_ridge_sklearn, R.alphas)
 
     # Plotting.plot_DataElaboration(f"Ridge regression, Normalization: {normalize}", labels, R)
 
@@ -125,17 +117,14 @@ def executeOnMinPrediction(data: DataSet, minPredictions: DataElaboration):
     cholesky_ = Cholesky(minPredictions.best_cholesky_alpha)
     svd_ = SVD(minPredictions.best_svd_alpha)
     lsqr_ = LSQR(minPredictions.best_lsqr_alpha)
-    ridge_sklearn_ = Ridge_SKLearn(minPredictions.best_ridge_sklearn_alpha)
 
     R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
-    R_ridge_sklearn = ridge_sklearn_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
 
     Plotting.scatterPlot(f"Cholesky - ɑ: {minPredictions.best_cholesky_alpha}", y_predict=R_cholesky.y_predict, y_test=data.y_test)
     Plotting.scatterPlot(f"SVD - ɑ: {minPredictions.best_svd_alpha}", y_predict=R_svd.y_predict, y_test=data.y_test)
     Plotting.scatterPlot(f"LSQR - ɑ: {minPredictions.best_lsqr_alpha}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
-    Plotting.scatterPlot(f"SKLearn - ɑ: {minPredictions.best_ridge_sklearn_alpha}", y_predict=R_ridge_sklearn.y_predict, y_test=data.y_test)
 
 
 if __name__ == "__main__":

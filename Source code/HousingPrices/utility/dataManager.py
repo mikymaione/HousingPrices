@@ -27,26 +27,6 @@ numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms"
 
 class DataManager:
 
-    # https://en.wikipedia.org/wiki/Coefficient_of_determination
-    @staticmethod
-    def coefficient_of_determination(y_test: numpy.ndarray, y_predict: numpy.ndarray) -> numpy.float64:
-        correlation_matrix = numpy.corrcoef(y_test, y_predict)
-
-        correlation_xy = correlation_matrix[0, 1]
-
-        r_squared = correlation_xy ** 2
-
-        return r_squared
-
-    # https://en.wikipedia.org/wiki/Mean_absolute_percentage_error
-    @staticmethod
-    def mean_absolute_percentage_error(y_test: numpy.ndarray, y_predict: numpy.ndarray) -> numpy.float64:
-        # abs_errors = numpy.abs((y_test - y_predict) / y_test)
-        # return numpy.mean(abs_errors) * 100
-        y_predict = y_predict.reshape(-1)
-
-        return mean_squared_error(y_predict, y_test)
-
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
     def load_data(csv_file: str, use_cross_validation: bool, usePCA: bool = False, showInfo: bool = False) -> Tuple[List[DataSet], pandas.DataFrame]:

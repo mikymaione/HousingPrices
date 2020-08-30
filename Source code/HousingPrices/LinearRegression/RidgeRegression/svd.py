@@ -25,6 +25,6 @@ class SVD(BaseRidgeRegression):
 
         # numpy.diag: Extract a diagonal
         # w = V·diag(Σ/(Σ² + ɑ²))·Uᵀ·y
-        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + self.ɑ ** 2))).dot(U.T.dot(y))
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + self.alpha ** 2))).dot(U.T.dot(y))
 
         return w.reshape(1, -1)

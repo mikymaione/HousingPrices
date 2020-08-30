@@ -35,12 +35,10 @@ class Plotting:
         ax1.plot(P.alphas, P.mapes_cholesky, label=labels[0])
         ax1.plot(P.alphas, P.mapes_svd, label=labels[1])
         ax1.plot(P.alphas, P.mapes_lsqr, label=labels[2])
-        ax1.plot(P.alphas, P.mapes_ridge_sklearn, label=labels[3])
 
         ax2.plot(P.alphas, P.r2s_cholesky, label=labels[0])
         ax2.plot(P.alphas, P.r2s_svd, label=labels[1])
         ax2.plot(P.alphas, P.r2s_lsqr, label=labels[2])
-        ax2.plot(P.alphas, P.r2s_ridge_sklearn, label=labels[3])
 
         ax1.legend()
         ax2.legend()

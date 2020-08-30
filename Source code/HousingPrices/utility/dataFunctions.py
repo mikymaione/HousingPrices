@@ -41,7 +41,4 @@ class DataFunctions:
             if P.min_lsqr_mape < P0.min_lsqr_mape:
                 P0.min_lsqr_mape = P.min_lsqr_mape
 
-            if P.min_ridge_sklearn_mape < P0.min_ridge_sklearn_mape:
-                P0.min_ridge_sklearn_mape = P.min_ridge_sklearn_mape
-
         return P0
