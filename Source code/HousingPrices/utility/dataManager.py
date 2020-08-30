@@ -11,6 +11,7 @@ import pandas
 import seaborn
 import matplotlib.pyplot as plt
 
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn import decomposition
@@ -40,9 +41,11 @@ class DataManager:
     # https://en.wikipedia.org/wiki/Mean_absolute_percentage_error
     @staticmethod
     def mean_absolute_percentage_error(y_test: numpy.ndarray, y_predict: numpy.ndarray) -> numpy.float64:
-        abs_errors = numpy.abs((y_test - y_predict) / y_test)
+        # abs_errors = numpy.abs((y_test - y_predict) / y_test)
+        # return numpy.mean(abs_errors) * 100
+        y_predict = y_predict.reshape(-1)
 
-        return numpy.mean(abs_errors) * 100
+        return mean_squared_error(y_predict, y_test)
 
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
