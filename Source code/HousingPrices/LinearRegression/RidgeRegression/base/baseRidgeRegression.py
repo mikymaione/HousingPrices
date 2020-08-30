@@ -18,8 +18,11 @@ class BaseRidgeRegression:
     w: numpy.ndarray
     intercetta: numpy.ndarray
 
-    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
-        self.fit(S=S, y=y, ɑ=ɑ)
+    def __init__(self, ɑ: float):
+        self.ɑ = ɑ
+
+    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
+        self.fit(S=S, y=y)
         R = ElaborationResult(self.w, self.predict(x_test))
 
         R.mape = DataManager.mean_absolute_percentage_error(y_test=y_test, y_predict=R.y_predict)
@@ -32,7 +35,7 @@ class BaseRidgeRegression:
 
         return DataManager.coefficient_of_determination(y_test=y_test, y_predict=y_predict)
 
-    def fit(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> None:
+    def fit(self, S: numpy.ndarray, y: numpy.ndarray) -> None:
         y = y.reshape(-1, 1)
 
         # Compute the weighted arithmetic mean along the specified axis.
@@ -48,7 +51,7 @@ class BaseRidgeRegression:
         # The function normalize provides a quick and easy way to perform this operation on a single array-like dataset, either using the l1 or l2 norms.
         S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
-        self.w = self.calculateWeights(S, y, ɑ) / norm_L2
+        self.w = self.calculateWeights(S, y) / norm_L2
         self.intercetta = y_wam - S_wam.dot(self.w.T)
 
     def predict(self, x_test: numpy.ndarray) -> numpy.ndarray:
@@ -57,5 +60,5 @@ class BaseRidgeRegression:
         return y_predict.reshape(1, -1)
 
     # abstract
-    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
+    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         raise NotImplementedError("Please Implement this method")

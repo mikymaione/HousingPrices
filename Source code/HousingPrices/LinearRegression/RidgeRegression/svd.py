@@ -14,7 +14,7 @@ from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeR
 class SVD(BaseRidgeRegression):
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
-    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
+    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         y = y.reshape(-1, 1)
 
         # Singular Value Decomposition.
@@ -25,6 +25,6 @@ class SVD(BaseRidgeRegression):
 
         # numpy.diag: Extract a diagonal
         # w = V·diag(Σ/(Σ² + ɑ²))·Uᵀ·y
-        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + ɑ ** 2))).dot(U.T.dot(y))
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + self.ɑ ** 2))).dot(U.T.dot(y))
 
         return w.reshape(1, -1)

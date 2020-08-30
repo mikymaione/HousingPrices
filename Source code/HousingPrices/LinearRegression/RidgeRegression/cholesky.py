@@ -14,14 +14,14 @@ from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeR
 class Cholesky(BaseRidgeRegression):
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Regolarizzazione_generalizzata_di_Tikhonov
-    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray, ɑ: float) -> numpy.ndarray:
+    def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         features = S.shape[1]
 
         Sᵀy = S.T.dot(y)
         SᵀS = S.T.dot(S)
 
         for i in range(features):
-            SᵀS[i, i] += ɑ
+            SᵀS[i, i] += self.ɑ
 
         # Solve a linear matrix equation, or system of linear scalar equations.
         # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
