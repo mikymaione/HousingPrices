@@ -11,15 +11,14 @@ import pandas
 import seaborn
 import matplotlib.pyplot as plt
 
-from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold, train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
 from sklearn import decomposition
 from typing import List, Tuple
 
 from Utility.dataTypes import DataSet
 
-shuffleDataSet = True
+shuffleDataSet = False
 column_to_predict = 'median_house_value'
 categories_columns = ['ocean_proximity']
 numerics_columns = ["longitude", "latitude", "housing_median_age", "total_rooms", "total_bedrooms", "population", "households", "median_income"]
@@ -35,6 +34,7 @@ class DataManager:
 
         # leggi tutto il file
         data_frame = pandas.read_csv(filepath_or_buffer=csv_file)
+        data_frame = data_frame.sample(frac=1).reset_index(drop=True)
 
         if showInfo:
             print(data_frame.info())
@@ -49,14 +49,15 @@ class DataManager:
                 m = data_frame[c].mean()
                 data_frame[c].fillna(value=m, inplace=True)
 
-        # genera le colonne per ogni elemento di una colonna categoria
-        columns_categories = DataManager.__categories_to_columns(data_frame=data_frame, categories_columns=categories_columns)
+        labelencoder = LabelEncoder()
 
-        # elimina le colonne categoria
+        for c in categories_columns:
+            data_frame[c + '_cat'] = labelencoder.fit_transform(data_frame[c])
+
         data_frame.drop(columns=categories_columns, inplace=True)
 
-        # aggiungi le colonne per ogni elemento di una colonna categoria
-        data_frame = pandas.concat([data_frame, columns_categories], axis=1)
+        outliers = data_frame[data_frame[column_to_predict] == 500001].index
+        data_frame.drop(outliers, inplace=True)
 
         if showInfo:
             corr = data_frame.corr()
@@ -75,6 +76,17 @@ class DataManager:
 
         X = data_frame.drop(columns=['households', 'total_bedrooms', column_to_predict])
         y = data_frame[column_to_predict]
+
+        column_to_predict_idx = data_frame.columns.get_loc(column_to_predict)
+        cols = list(range(0, data_frame.shape[1]))
+        cols.remove(column_to_predict_idx)
+
+        scaler = MinMaxScaler()
+        scaler.fit(data_frame)
+        data_frame = scaler.transform(data_frame)
+
+        X = data_frame[:, cols]
+        y = data_frame[:, column_to_predict_idx]
 
         if usePCA:
             X = DataManager.getPCA(X)
@@ -131,18 +143,18 @@ class DataManager:
 
     @staticmethod
     def toDataSet(x_train, x_test, y_train: pandas.Series, y_test: pandas.Series, standardize: bool) -> DataSet:
-        if standardize:
-            # Standardize features by removing the mean and scaling to unit variance
-            # The standard score of a sample X is calculated as:
-            # z = (X - μ) / σ²
-            ss = StandardScaler()
-            ss.fit(X=x_train[numerics_columns])
-            x_train = ss.transform(X=x_train[numerics_columns])
-
-            # usa (X-μ / √σ²) sul test
-            centered_df = x_test[numerics_columns] - ss.mean_
-            x_test = centered_df / (ss.var_ ** 0.5)
-            x_test = x_test.to_numpy()
+        # if standardize:
+        # Standardize features by removing the mean and scaling to unit variance
+        # The standard score of a sample X is calculated as:
+        # z = (X - μ) / σ²
+        # ss = StandardScaler()
+        # ss.fit(X=x_train[numerics_columns])
+        # x_train = ss.transform(X=x_train[numerics_columns])
+        #
+        # # usa (X-μ / √σ²) sul test
+        # centered_df = x_test[numerics_columns] - ss.mean_
+        # x_test = centered_df / (ss.var_ ** 0.5)
+        # x_test = x_test.to_numpy()
 
         return DataSet(
             x_train=x_train,

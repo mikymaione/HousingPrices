@@ -12,12 +12,12 @@
 # Study the dependence of the cross-validated risk estimate on the parameter alpha of ridge regression.
 # Try using PCA to improve the risk estimate.
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
-
-from typing import List
-
 import numpy
-from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
+import matplotlib.pyplot as plt
+
 from tabulate import tabulate
+from typing import List
+from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
 
 from Utility.plotting import Plotting
 from Utility.dataTypes import DataSet, DataElaboration
@@ -140,7 +140,7 @@ def nestedCrossValidation():
 
     datas, X, y = DataManager.load_data("cal-housing.csv", False)
 
-    cholesky = Cholesky()
+    solver = SVD()
 
     for i in range(nested_cross_validation_trials):
         # Choose cross-validation techniques for the inner and outer loops, independently of the dataset
@@ -148,14 +148,40 @@ def nestedCrossValidation():
         outer_cv = KFold(n_splits=5, shuffle=shuffleDataSet)
 
         # Non_nested parameter search and scoring
-        clf = GridSearchCV(estimator=cholesky, param_grid=p_grid, cv=inner_cv, n_jobs=1)
+        clf = GridSearchCV(estimator=solver, param_grid=p_grid, cv=inner_cv, n_jobs=-1)
         clf.fit(X, y)
 
         non_nested_scores[i] = clf.best_score_
 
         # Nested CV with parameter optimization
-        nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=1)
+        nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=-1)
         nested_scores[i] = nested_score.mean()
+
+    score_difference = non_nested_scores - nested_scores
+    print("Average difference of {:6f} with std. dev. of {:6f}.".format(score_difference.mean(), score_difference.std()))
+
+    # Plot scores on each trial for nested and non-nested CV
+    plt.subplot(211)
+
+    non_nested_scores_line, = plt.plot(non_nested_scores)
+    nested_line, = plt.plot(nested_scores)
+
+    plt.ylabel("score")
+    plt.grid()
+    plt.legend([non_nested_scores_line, nested_line], ["Non-Nested CV", "Nested CV"])
+    plt.title("Non-Nested and Nested Cross Validation")
+
+    # Plot bar chart of the difference.
+    plt.subplot(212)
+    difference_plot = plt.bar(range(nested_cross_validation_trials), score_difference)
+
+    plt.xlabel("Individual Trial #")
+
+    plt.grid()
+    plt.legend([difference_plot], ["Non-Nested CV - Nested CV Score"])
+    plt.ylabel("score difference")
+
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -166,3 +192,4 @@ if __name__ == "__main__":
 
     # executeOnRangeOfAlpha()
     # executeCrossValidation()
+    nestedCrossValidation()
