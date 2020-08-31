@@ -27,4 +27,4 @@ class Cholesky(BaseRidgeRegression):
         # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
         w = numpy.linalg.solve(SᵀS, Sᵀy).T
 
-        return w
+        return w.reshape(-1)
