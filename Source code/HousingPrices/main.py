@@ -14,6 +14,9 @@
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 
 from typing import List
+
+import numpy
+from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
 from tabulate import tabulate
 
 from Utility.plotting import Plotting
@@ -127,11 +130,39 @@ def executeOnMinPrediction(data: DataSet, minPredictions: DataElaboration):
     Plotting.scatterPlot(f"LSQR - ɑ: {minPredictions.best_lsqr_alpha}", y_predict=R_lsqr.y_predict, y_test=data.y_test)
 
 
+def nestedCrossValidation():
+    nested_cross_validation_trials = 10
+    p_grid = {"alpha": alphas}
+    shuffleDataSet = True
+
+    non_nested_scores = numpy.zeros(nested_cross_validation_trials)
+    nested_scores = numpy.zeros(nested_cross_validation_trials)
+
+    datas, X, y = DataManager.load_data("cal-housing.csv", False)
+
+    cholesky = Cholesky()
+
+    for i in range(nested_cross_validation_trials):
+        # Choose cross-validation techniques for the inner and outer loops, independently of the dataset
+        inner_cv = KFold(n_splits=5, shuffle=shuffleDataSet)
+        outer_cv = KFold(n_splits=5, shuffle=shuffleDataSet)
+
+        # Non_nested parameter search and scoring
+        clf = GridSearchCV(estimator=cholesky, param_grid=p_grid, cv=inner_cv, n_jobs=1)
+        clf.fit(X, y)
+
+        non_nested_scores[i] = clf.best_score_
+
+        # Nested CV with parameter optimization
+        nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=1)
+        nested_scores[i] = nested_score.mean()
+
+
 if __name__ == "__main__":
     print("HousingPrices Project")
     print("Copyright (c) 2020 Anna Olena Zhab'yak, Michele Maione")
     print("")
     print("Elaborating...")
 
-    executeOnRangeOfAlpha()
+    # executeOnRangeOfAlpha()
     # executeCrossValidation()

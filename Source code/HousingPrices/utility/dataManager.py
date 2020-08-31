@@ -29,7 +29,7 @@ class DataManager:
 
     # https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
     @staticmethod
-    def load_data(csv_file: str, use_cross_validation: bool, usePCA: bool = False, showInfo: bool = False) -> Tuple[List[DataSet], pandas.DataFrame]:
+    def load_data(csv_file: str, use_cross_validation: bool, usePCA: bool = False, showInfo: bool = False) -> Tuple[List[DataSet], pandas.DataFrame, pandas.Series]:
         # shuffled datasets
         datasets: List[DataSet] = []
 
@@ -99,7 +99,7 @@ class DataManager:
 
             datasets.append(DataManager.toDataSet(x_train, x_test, y_train, y_test, not usePCA))
 
-        return datasets, X
+        return datasets, X, y
 
     @staticmethod
     def getPCA(X: pandas.DataFrame) -> numpy.array:
