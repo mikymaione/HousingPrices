@@ -19,14 +19,14 @@ from tabulate import tabulate
 from typing import List
 from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
 
-from Utility.plotting import Plotting
-from Utility.dataTypes import DataSet, DataElaboration
-from Utility.dataManager import DataManager
-from Utility.dataFunctions import DataFunctions
+from plotting import Plotting
+from dataTypes import DataSet, DataElaboration
+from dataManager import DataManager
+from dataFunctions import DataFunctions
 
-from LinearRegression.RidgeRegression.svd import SVD
-from LinearRegression.RidgeRegression.lsqr import LSQR
-from LinearRegression.RidgeRegression.cholesky import Cholesky
+from svd import SVD
+from lsqr import LSQR
+from cholesky import Cholesky
 
 labels = ["Cholesky", "SVD", "LSQR"]
 alphas = [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.5, 2, 5, 15, 17]

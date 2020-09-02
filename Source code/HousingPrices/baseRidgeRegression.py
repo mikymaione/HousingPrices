@@ -14,7 +14,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.utils import check_X_y, check_array
 from sklearn.utils.validation import check_is_fitted
 
-from Utility.dataTypes import ElaborationResult
+from dataTypes import ElaborationResult
 
 
 class BaseRidgeRegression(BaseEstimator):

@@ -8,23 +8,24 @@
 
 import numpy
 
-from LinearRegression.RidgeRegression.base.baseRidgeRegression import BaseRidgeRegression
+from baseRidgeRegression import BaseRidgeRegression
 
 
-class Cholesky(BaseRidgeRegression):
+class SVD(BaseRidgeRegression):
 
-    # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Regolarizzazione_generalizzata_di_Tikhonov
+    # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
-        features = S.shape[1]
+        y = y.reshape(-1, 1)
 
-        Sᵀy = S.T.dot(y)
-        SᵀS = S.T.dot(S)
+        # Singular Value Decomposition.
+        # U: Unitary array; eigenvectors of SSᵀ
+        # Σ: Vector with the singular values, sorted in descending order
+        # Vᵀ: Unitary array (Conjugate transpose); eigenvectors of SᵀS
+        U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
 
-        for i in range(features):
-            SᵀS[i, i] += self.alpha
-
-        # Solve a linear matrix equation, or system of linear scalar equations.
-        # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
-        w = numpy.linalg.solve(SᵀS, Sᵀy).T
+        # numpy.diag: Extract a diagonal
+        # w = V·diag(Σ/(Σ² + ɑ²))·Uᵀ·y
+        w = Vᵀ.T.dot(numpy.diag(Σ / (Σ ** 2 + self.alpha ** 2))).dot(U.T.dot(y))
+        w = w.reshape(1, -1)
 
         return w.reshape(-1)

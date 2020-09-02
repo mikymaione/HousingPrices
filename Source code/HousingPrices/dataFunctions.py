@@ -10,7 +10,7 @@ import numpy
 
 from typing import List, Tuple
 
-from Utility.dataTypes import DataElaboration
+from dataTypes import DataElaboration
 
 
 class DataFunctions:

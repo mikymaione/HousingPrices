@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
 from sklearn import decomposition
 from typing import List, Tuple
 
-from Utility.dataTypes import DataSet
+from dataTypes import DataSet
 
 shuffleDataSet = False
 column_to_predict = 'median_house_value'

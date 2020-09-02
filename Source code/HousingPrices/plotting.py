@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from typing import List, Tuple
 
-from Utility.dataTypes import DataElaboration
+from dataTypes import DataElaboration
 
 
 class Plotting:
