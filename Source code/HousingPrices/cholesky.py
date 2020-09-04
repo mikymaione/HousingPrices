@@ -14,17 +14,19 @@ from baseRidgeRegression import BaseRidgeRegression
 class Cholesky(BaseRidgeRegression):
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Regolarizzazione_generalizzata_di_Tikhonov
+    # https://xavierbourretsicotte.github.io/intro_ridge.html
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         features = S.shape[1]
+
+        I = numpy.eye((features))
+        αI = self.alpha * I
 
         Sᵀy = S.T.dot(y)
         SᵀS = S.T.dot(S)
 
-        for i in range(features):
-            SᵀS[i, i] += self.alpha
-
-        # Solve a linear matrix equation, or system of linear scalar equations.
-        # Computes the “exact” solution, w, of the well-determined, i.e., full rank, linear matrix equation Sᵀ·S·w = Sᵀ·y
-        w = numpy.linalg.solve(SᵀS, Sᵀy).T
+        # Closed form solution:
+        # (Sᵀ·S + α·I)·w = Sᵀ·y
+        # w = (Sᵀ·S + α·I)⁻¹·Sᵀ·y
+        w = numpy.linalg.inv(SᵀS + αI).dot(Sᵀy)
 
         return w.reshape(-1)
