@@ -111,7 +111,7 @@ class DataManager:
                 datasets.append(DataManager.toDataSet(x_train, x_test, y_train, y_test))
         else:
             # Split arrays or matrices into random train and test subsets
-            x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=shuffleDataSet)
+            x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, shuffle=shuffleDataSet)
 
             datasets.append(DataManager.toDataSet(x_train, x_test, y_train, y_test))
 

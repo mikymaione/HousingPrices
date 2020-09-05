@@ -197,9 +197,9 @@ if __name__ == "__main__":
     datas, X, y = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
-    best_cholesky_alpha = 0.001
+    best_cholesky_alpha = 0.00001
     cholesky = Cholesky(best_cholesky_alpha)
 
     R = cholesky.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
 
-    Plotting.scatterPlot(f"Cholesky - ɑ: {best_cholesky_alpha}", y_predict=R.y_predict, y_test=data.y_test)
+    Plotting.scatterPlot(f"Cholesky - ɑ: {best_cholesky_alpha}", y_predict=R.y_predict, y_test=data.y_test.to_numpy())
