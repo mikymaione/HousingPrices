@@ -20,13 +20,15 @@ class Cholesky(BaseRidgeRegression):
 
         I = numpy.eye((features))
         αI = self.alpha * I
+        Γ = αI
+        ΓᵀΓ = Γ.T.dot(Γ)
 
         Sᵀy = S.T.dot(y)
         SᵀS = S.T.dot(S)
 
         # Closed form solution:
-        # (Sᵀ·S + α·I)·w = Sᵀ·y
-        # w = (Sᵀ·S + α·I)⁻¹·Sᵀ·y
-        w = numpy.linalg.inv(SᵀS + αI).dot(Sᵀy)
+        # (Sᵀ·S + Γᵀ·Γ)·w = Sᵀ·y
+        # w = (Sᵀ·S + Γᵀ·Γ)⁻¹·Sᵀ·y
+        w = numpy.linalg.inv(SᵀS + ΓᵀΓ).dot(Sᵀy)
 
         return w.reshape(-1)
