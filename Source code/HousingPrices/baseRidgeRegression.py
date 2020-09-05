@@ -7,6 +7,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+import pandas
 
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
@@ -25,16 +26,21 @@ class BaseRidgeRegression(BaseEstimator):
     def __init__(self, alpha: float = 1.0):
         self.alpha = alpha
 
-    def executeAll(self, S: numpy.ndarray, y: numpy.ndarray, x_test: numpy.ndarray, y_test: numpy.ndarray) -> ElaborationResult:
-        self.fit(S, y)
-        R = ElaborationResult(self.coef_, self.predict(x_test))
+    def executeAll(self, S: pandas.DataFrame, y: pandas.Series, x_test: pandas.DataFrame, y_test: pandas.Series) -> ElaborationResult:
+        S_ = S.to_numpy()
+        y_ = y.to_numpy()
+        x_test_ = x_test.to_numpy()
+        y_test_ = y_test.to_numpy()
 
-        R.mape = mean_squared_error(y_test, R.y_predict)
-        R.r2 = r2_score(y_test, R.y_predict)
+        self.fit(S_, y_)
+        R = ElaborationResult(self.coef_, self.predict(x_test_))
+
+        R.mape = mean_squared_error(y_test_, R.y_predict)
+        R.r2 = r2_score(y_test_, R.y_predict)
 
         return R
 
-    def score(self, x_test: numpy.ndarray, y_test: numpy.ndarray) -> numpy.float64:
+    def score(self, x_test: pandas.DataFrame, y_test: pandas.Series) -> numpy.float64:
         y_predict = self.predict(x_test)
 
         return r2_score(y_test, y_predict)

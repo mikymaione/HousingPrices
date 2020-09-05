@@ -7,6 +7,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+import pandas
 
 from typing import List
 
@@ -50,7 +51,7 @@ class DataElaboration:
 
 @dataclass
 class DataSet:
-    x_train: numpy.ndarray
-    x_test: numpy.ndarray
-    y_train: numpy.ndarray
-    y_test: numpy.ndarray
+    x_train: pandas.DataFrame
+    x_test: pandas.DataFrame
+    y_train: pandas.Series
+    y_test: pandas.Series

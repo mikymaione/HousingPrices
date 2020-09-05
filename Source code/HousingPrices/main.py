@@ -78,8 +78,8 @@ def doPredictions(num_set: int, data: DataSet, tabulateOutput) -> DataElaboratio
 
 def executeCrossValidation() -> None:
     # carica i dati
-    cv_datas = DataManager.load_data("cal-housing.csv", True)
-    datas = DataManager.load_data("cal-housing.csv", False)
+    cv_datas, cv_X, cv_y = DataManager.load_data("cal-housing.csv", True)
+    datas, X, y = DataManager.load_data("cal-housing.csv", False)
 
     tabulateOutput = []
 
@@ -100,7 +100,7 @@ def executeCrossValidation() -> None:
 
 def executeOnRangeOfAlpha() -> None:
     # carica i dati
-    datas, X = DataManager.load_data("cal-housing.csv", False)
+    datas, X, y = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
     tabulateOutput = []
@@ -192,4 +192,14 @@ if __name__ == "__main__":
 
     # executeOnRangeOfAlpha()
     # executeCrossValidation()
-    nestedCrossValidation()
+    # nestedCrossValidation()
+
+    datas, X, y = DataManager.load_data("cal-housing.csv", False)
+    data = datas[0]
+
+    best_cholesky_alpha = 0.001
+    cholesky = Cholesky(best_cholesky_alpha)
+
+    R = cholesky.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
+
+    Plotting.scatterPlot(f"Cholesky - ɑ: {best_cholesky_alpha}", y_predict=R.y_predict, y_test=data.y_test)

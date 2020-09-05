@@ -7,8 +7,9 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy
+import seaborn
 import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
+
 from typing import List, Tuple
 
 from dataTypes import DataElaboration
@@ -46,19 +47,13 @@ class Plotting:
 
     @staticmethod
     def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray, figsize: Tuple[float, float] = None) -> None:
-        fig, ax = plt.subplots(figsize=figsize)
-        fig.suptitle(plotTitle)
-        fig.canvas.set_window_title(plotTitle)
+        plt.figure(figsize=figsize)
+        plt.title(plotTitle)
 
-        ax.set_xlabel("Predicted")
-        ax.set_ylabel("Real")
+        seaborn.regplot(y_test, y_predict, scatter_kws={'alpha': 0.5})
 
-        ax.scatter(y_predict, y_test, alpha=0.5)
+        plt.xlabel('Real')
+        plt.ylabel('Predicted')
 
-        line = mlines.Line2D([0, 1], [0, 1], color='red')
-        transform = ax.transAxes
-        line.set_transform(transform)
-
-        ax.add_line(line)
-
+        plt.grid()
         plt.show()
