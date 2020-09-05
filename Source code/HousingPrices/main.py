@@ -19,6 +19,7 @@ from tabulate import tabulate
 from typing import List
 from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
 
+from lasso import Lasso
 from plotting import Plotting
 from dataTypes import DataSet, DataElaboration
 from dataManager import DataManager
@@ -119,11 +120,12 @@ def executeOnRangeOfAlpha() -> None:
 def executeOnMinPrediction(data: DataSet, minPredictions: DataElaboration):
     cholesky_ = Cholesky(minPredictions.best_cholesky_alpha)
     svd_ = SVD(minPredictions.best_svd_alpha)
-    lsqr_ = LSQR(minPredictions.best_lsqr_alpha)
+    # lsqr_ = LSQR(minPredictions.best_lsqr_alpha)
+    lasso_ = Lasso(minPredictions.best_lsqr_alpha)
 
     R_cholesky = cholesky_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
     R_svd = svd_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
-    R_lsqr = lsqr_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
+    R_lsqr = lasso_.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
 
     Plotting.scatterPlot(f"Cholesky - ɑ: {minPredictions.best_cholesky_alpha}", y_predict=R_cholesky.y_predict, y_test=data.y_test)
     Plotting.scatterPlot(f"SVD - ɑ: {minPredictions.best_svd_alpha}", y_predict=R_svd.y_predict, y_test=data.y_test)
@@ -197,9 +199,10 @@ if __name__ == "__main__":
     datas, X, y = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
-    best_cholesky_alpha = 0.00001
-    cholesky = Cholesky(best_cholesky_alpha)
+    best_α = 0.01
+    # cholesky = Cholesky(best_α)
+    lasso = Lasso(best_α)
 
-    R = cholesky.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
+    R = lasso.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
 
-    Plotting.scatterPlot(f"Cholesky - ɑ: {best_cholesky_alpha}", y_predict=R.y_predict, y_test=data.y_test.to_numpy())
+    Plotting.scatterPlot(f"Lasso - ɑ: {best_α}", y_predict=R.y_predict, y_test=data.y_test.to_numpy())

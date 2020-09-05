@@ -11,21 +11,36 @@ import numpy
 from baseRidgeRegression import BaseRidgeRegression
 
 
-class SVD(BaseRidgeRegression):
+class Lasso(BaseRidgeRegression):
+    num_iters = 100
 
-    # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
+    # https://en.wikipedia.org/wiki/Lasso_(statistics)
+    # https://xavierbourretsicotte.github.io/lasso_implementation.html
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
-        y = y.reshape(-1, 1)
+        β = self.coordinate_descent_lasso(S, y, self.alpha)
 
-        # Singular Value Decomposition.
-        # U: Unitary array; eigenvectors of SSᵀ
-        # Σ: Vector with the singular values, sorted in descending order
-        # Vᵀ: Unitary array (Conjugate transpose); eigenvectors of SᵀS
-        U, Σ, Vᵀ = numpy.linalg.svd(S, full_matrices=False)
+        return β
 
-        # numpy.diag: Extract a diagonal
-        # w = V·diag(Σ/(Σ² + ɑ²))·Uᵀ·y
-        w = Vᵀ.T @ numpy.diag(Σ / (Σ ** 2 + self.alpha ** 2)) @ U.T @ y
-        w = w.reshape(1, -1)
+    def S(self, ρ: float, λ: float) -> float:
+        if ρ < - λ:
+            return ρ + λ
+        elif ρ > λ:
+            return ρ - λ
+        else:
+            return 0
 
-        return w.reshape(-1)
+    def coordinate_descent_lasso(self, X: numpy.ndarray, y: numpy.ndarray, λ: float) -> numpy.ndarray:
+        features = X.shape[1]
+        β = numpy.ones((features, 1))
+
+        for n in range(self.num_iters):
+            for j in range(features):
+                Xⱼ = X[:, j].reshape(-1, 1)
+                y_ = X @ β
+
+                ρ = Xⱼ.T @ (y - y_ + β[j] * Xⱼ)
+                ρ = ρ.item()
+
+                β[j] = self.S(ρ, λ)
+
+        return β.flatten()
