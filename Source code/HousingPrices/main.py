@@ -30,7 +30,7 @@ from lsqr import LSQR
 from cholesky import Cholesky
 
 labels = ["Cholesky", "SVD", "LSQR"]
-alphas = [1e-15, 1e-10, 1e-8, 1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.25, 0.26, 0.27, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.5, 2, 5, 15, 17]
+alphas = numpy.sort(numpy.linspace(1, 0, 20, False))
 
 
 # apprendi pesi tramite Ridge Regression
@@ -199,10 +199,13 @@ if __name__ == "__main__":
     datas, X, y = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
-    best_α = 0.01
-    # cholesky = Cholesky(best_α)
-    lasso = Lasso(best_α)
+    cholesky = Cholesky()
+    lasso = Lasso()
 
-    R = lasso.executeAll(S=data.x_train, y=data.y_train, x_test=data.x_test, y_test=data.y_test)
+    cholesky.calculateScoring(alphas, data.x_train, data.y_train, data.x_test, data.y_test)
+    lasso.calculateScoring(alphas, data.x_train, data.y_train, data.x_test, data.y_test)
 
-    Plotting.scatterPlot(f"Lasso - ɑ: {best_α}", y_predict=R.y_predict, y_test=data.y_test.to_numpy())
+    cholesky.printBestScores()
+    lasso.printBestScores()
+
+    Plotting.plotXY(alphas, [cholesky.R2, lasso.R2], [cholesky.algo, lasso.algo], 'ɑ', 'R²')

@@ -8,7 +8,6 @@
 import numpy
 import pandas
 
-from typing import Tuple, List
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
 from sklearn.metrics import mean_squared_error, r2_score
@@ -20,22 +19,12 @@ from dataTypes import ElaborationResult
 
 
 class BaseRidgeRegression(BaseEstimator):
-    algo = ''
-
-    coef_: numpy.ndarray
-    intercetta: numpy.ndarray
-
-    alphas = [0.0]
-    alpha: float = 1.0
-    best_alpha: float = 1.0
-
-    MSE = [0.0]
-    R2 = [0.0]
-
     nested_cross_validation_trials = 10
 
     def __init__(self, alpha: float = 1.0):
         self.alpha = alpha
+        self.R2 = []
+        self.MSE = []
 
     def nestedCrossValidationKFold(self, X, y) -> None:
         p_grid = {"alpha": self.alphas}
@@ -93,10 +82,10 @@ class BaseRidgeRegression(BaseEstimator):
     def printBestScores(self) -> None:
         print(self.algo + ':')
         print(f'-best ɑ: {self.best_alpha}')
-        print(f'-best MAE: {self.MSE[self.idx_max_mse.item()]}')
-        print(f'-best R²: {self.R2[self.idx_max_r2.item()]}')
+        print(f'-best MSE: {self.best_MSE}')
+        print(f'-best R²: {self.best_R2}')
 
-    def calculateScoring(self, alphas: List[float], x_train: pandas.DataFrame, y_train: pandas.Series, x_test: pandas.DataFrame, y_test: pandas.Series) -> Tuple[List[float], List[float]]:
+    def calculateScoring(self, alphas, x_train: pandas.DataFrame, y_train: pandas.Series, x_test: pandas.DataFrame, y_test: pandas.Series) -> None:
         self.MSE.clear()
         self.R2.clear()
         self.alphas = alphas
@@ -109,10 +98,13 @@ class BaseRidgeRegression(BaseEstimator):
             self.MSE.append(mean_squared_error(y_test, y_predict))
             self.R2.append(r2_score(y_test, y_predict))
 
-        self.idx_max_r2 = numpy.argmax(self.R2)
-        self.idx_max_mse = numpy.argmin(self.MSE)
+        idx_best_r2 = numpy.argmax(self.R2)
+        idx_best_mse = numpy.argmin(self.MSE)
 
-        self.best_alpha = self.alphas[self.idx_max_r2.item()]
+        self.best_MSE = self.MSE[idx_best_mse]
+        self.best_R2 = self.R2[idx_best_r2]
+
+        self.best_alpha = self.alphas[idx_best_r2]
         self.alpha = self.best_alpha
 
     def executeAll(self, S: pandas.DataFrame, y: pandas.Series, x_test: pandas.DataFrame, y_test: pandas.Series) -> ElaborationResult:
