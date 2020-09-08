@@ -12,6 +12,7 @@ from baseRidgeRegression import BaseRidgeRegression
 
 
 class Lasso(BaseRidgeRegression):
+    algo = 'Lasso'
     num_iters = 100
 
     # https://en.wikipedia.org/wiki/Lasso_(statistics)

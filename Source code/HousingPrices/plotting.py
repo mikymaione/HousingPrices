@@ -6,16 +6,56 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import numpy
+import pandas
 import seaborn
 import matplotlib.pyplot as plt
 
-from typing import List, Tuple
+from typing import List
 
 from dataTypes import DataElaboration
 
 
 class Plotting:
+
+    @staticmethod
+    def plotNestedCrossVal(nested_cross_validation_trials, nested_scores, non_nested_scores, score_difference) -> None:
+        # Plot scores on each trial for nested and non-nested CV
+        plt.figure(figsize=(15, 15))
+        plt.subplot(211)
+
+        non_nested_scores_line, = plt.plot(non_nested_scores)
+        nested_line, = plt.plot(nested_scores)
+
+        plt.ylabel("score")
+        plt.grid()
+        plt.legend([non_nested_scores_line, nested_line], ["Non-Nested CV", "Nested CV"])
+        plt.title("Non-Nested and Nested Cross Validation")
+
+        # Plot bar chart of the difference.
+        plt.subplot(212)
+        difference_plot = plt.bar(range(nested_cross_validation_trials), score_difference)
+
+        plt.xlabel("Individual Trial #")
+
+        plt.grid()
+        plt.legend([difference_plot], ["Non-Nested CV - Nested CV Score"])
+        plt.ylabel("score difference")
+
+        plt.show()
+
+    @staticmethod
+    def plotXY(x_serie: List[float], y_series: List[List[float]], y_labels: List[str]) -> None:
+        plt.figure(figsize=(15, 7))
+
+        for i in range(0, len(y_labels)):
+            plt.plot(x_serie, y_series[i], label=y_labels[i])
+
+        plt.xlabel("ɑ")
+        plt.ylabel("MSE")
+
+        plt.legend()
+        plt.grid()
+        plt.show()
 
     @staticmethod
     def plot_DataElaboration(titolo: str, labels: List[str], P: DataElaboration) -> None:
@@ -46,9 +86,26 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def scatterPlot(plotTitle: str, y_predict: numpy.ndarray, y_test: numpy.ndarray, figsize: Tuple[float, float] = None) -> None:
-        plt.figure(figsize=figsize)
-        plt.title(plotTitle)
+    def coeficientPlot(x_train, coef_) -> None:
+        # get ridge coefficient and print them
+        coefficient = pandas.DataFrame()
+        coefficient["Columns"] = x_train.columns
+        coefficient['Coefficient Estimate'] = pandas.Series(coef_)
+
+        # plotting the coefficient score
+        fig, ax = plt.subplots(figsize=(20, 10))
+
+        ax.bar(coefficient["Columns"], coefficient['Coefficient Estimate'])
+
+        ax.spines['bottom'].set_position('zero')
+
+        plt.grid()
+        plt.show()
+
+    @staticmethod
+    def scatterPlot(algo: str, y_predict, y_test) -> None:
+        plt.figure(figsize=(15, 15))
+        plt.title('Real vs Predicted - ' + algo)
 
         seaborn.regplot(y_test, y_predict, scatter_kws={'alpha': 0.5})
 
