@@ -44,14 +44,15 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def plotXY(x_serie: List[float], y_series: List[List[float]], y_labels: List[str]) -> None:
+    def plotXY(x_serie, y_series, y_labels: List[str], xlabel: str, ylabel: str) -> None:
         plt.figure(figsize=(15, 7))
 
         for i in range(0, len(y_labels)):
-            plt.plot(x_serie, y_series[i], label=y_labels[i])
+            y_serie = y_series[i]
+            plt.plot(x_serie, y_serie, label=y_labels[i])
 
-        plt.xlabel("ɑ")
-        plt.ylabel("MSE")
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
 
         plt.legend()
         plt.grid()
@@ -111,6 +112,25 @@ class Plotting:
 
         plt.xlabel('Real')
         plt.ylabel('Predicted')
+
+        plt.grid()
+        plt.show()
+
+    @staticmethod
+    def heatMap(corr, title: str) -> None:
+        plt.figure(figsize=(15, 15))
+        plt.title(title)
+
+        seaborn.heatmap(corr, square=True, annot=True)
+
+        plt.show()
+
+    @staticmethod
+    def distPlot(data, title: str) -> None:
+        plt.figure(figsize=(15, 7))
+        plt.title(title)
+
+        seaborn.distplot(data)
 
         plt.grid()
         plt.show()
