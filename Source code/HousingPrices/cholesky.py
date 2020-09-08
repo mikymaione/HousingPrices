@@ -12,6 +12,7 @@ from baseRidgeRegression import BaseRidgeRegression
 
 
 class Cholesky(BaseRidgeRegression):
+    algo = 'Cholesky'
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Regolarizzazione_generalizzata_di_Tikhonov
     # https://xavierbourretsicotte.github.io/intro_ridge.html
