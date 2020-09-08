@@ -10,8 +10,9 @@ import pandas
 
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
+from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
+from sklearn.model_selection import KFold, GridSearchCV, cross_val_score, train_test_split, learning_curve
 from sklearn.utils import check_X_y, check_array
 from sklearn.utils.validation import check_is_fitted
 
@@ -106,6 +107,34 @@ class BaseRidgeRegression(BaseEstimator):
 
         self.best_alpha = self.alphas[idx_best_r2]
         self.alpha = self.best_alpha
+
+    def trainBySize(self, sizes, X, y) -> numpy.ndarray:
+        coef_list = []
+
+        for s in sizes:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=s, shuffle=True)
+            self.fit(X_train, y_train)
+            coef_list.append(self.coef_)
+
+        return numpy.array(coef_list)
+
+    def fitPCA(self, n_components: int, X: numpy.ndarray):
+        pca = PCA(n_components=n_components)
+        pca.fit(X)
+        coef_pca = pca.transform(X)
+        self.pca_singular_values = pca.singular_values_
+
+        return coef_pca
+
+    def learningCurvePCA(self, sizes, n_components: int, X: numpy.ndarray, y: numpy.ndarray, scoring):
+        X_pca = self.fitPCA(n_components, X)
+        return learning_curve(self, X_pca, y, train_sizes=sizes, cv=5, scoring=scoring, n_jobs=-1)
+
+    def fitPCABySize(self, sizes, X, y, n_components: int):
+        coef_matrix = self.trainBySize(sizes, X, y)
+        coef_pca = self.fitPCA(n_components, coef_matrix)
+
+        return coef_pca
 
     def executeAll(self, S: pandas.DataFrame, y: pandas.Series, x_test: pandas.DataFrame, y_test: pandas.Series) -> ElaborationResult:
         S_ = S.to_numpy()

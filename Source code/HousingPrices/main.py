@@ -14,10 +14,11 @@
 # Optionally, use nested cross-validated risk estimates to remove the need of choosing the parameter.
 import numpy
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 from tabulate import tabulate
 from typing import List
-from sklearn.model_selection import KFold, GridSearchCV, cross_val_score
+from sklearn.model_selection import KFold, GridSearchCV, cross_val_score, learning_curve
 
 from lasso import Lasso
 from plotting import Plotting
@@ -202,10 +203,27 @@ if __name__ == "__main__":
     cholesky = Cholesky()
     lasso = Lasso()
 
-    cholesky.calculateScoring(alphas, data.x_train, data.y_train, data.x_test, data.y_test)
-    lasso.calculateScoring(alphas, data.x_train, data.y_train, data.x_test, data.y_test)
+    min_ts = int(X.shape[0] * 0.1)
+    max_ts = int(X.shape[0] * 0.8)
+    step_ts = int(X.shape[0] * 0.05)
+    sizes = range(min_ts, max_ts, step_ts)
 
-    cholesky.printBestScores()
-    lasso.printBestScores()
+    pca = PCA(n_components=5)
+    pca.fit(X)
 
-    Plotting.plotXY(alphas, [cholesky.R2, lasso.R2], [cholesky.algo, lasso.algo], 'ɑ', 'R²')
+    X_pca = pca.transform(X)
+
+    # Returns:
+    # -Numbers of training examples that has been used to generate the learning curve. Note that the number of ticks might be less than n_ticks because duplicate entries will be removed;
+    # -Scores on training sets;
+    # -Scores on test set.
+    train_size, train_score, val_score = learning_curve(cholesky, X_pca, y, train_sizes=sizes, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+
+    Plotting.plotAreaMeanStd(
+        'PCA Linear Regression',
+        sizes,
+        [train_score, val_score],
+        ['Training error', 'CV risk estimate'],
+        ['r', 'g'],
+        'Training size',
+        'MSE')

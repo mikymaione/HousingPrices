@@ -5,7 +5,7 @@
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+import numpy
 import pandas
 import seaborn
 import matplotlib.pyplot as plt
@@ -44,12 +44,65 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def plotXY(x_serie, y_series, y_labels: List[str], xlabel: str, ylabel: str) -> None:
+    def plotAreaMeanStd(title: str, x, y, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
+        y0 = y[0]
+        y1 = y[1]
+
+        y0_mean = -numpy.mean(y0, axis=1)
+        y0_std = numpy.std(y0, axis=1)
+
+        y1_mean = -numpy.mean(y1, axis=1)
+        y1_std = numpy.std(y1, axis=1)
+
+        Plotting.plotXYArea(
+            title,
+            x,
+            [y0_mean, y1_mean],
+            [y0_mean - y1_std, y1_mean - y1_std],
+            [y0_mean + y0_std, y1_mean + y1_std],
+            labels,
+            colors,
+            xlabel,
+            ylabel)
+
+    @staticmethod
+    def plotXYArea(title: str, x, y, a, b, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
+        plt.figure(figsize=(15, 15))
+        plt.title(title)
+
+        for i in range(len(colors)):
+            plt.fill_between(x, a[i], b[i], alpha=0.1, color=colors[i])
+            plt.plot(x, y[i], 'o-', color=colors[i], label=labels[i])
+
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+    @staticmethod
+    def plotXY(x_serie, y_series, y_labels: List[str], xlabel: str, ylabel: str, title: str = '') -> None:
         plt.figure(figsize=(15, 7))
+        plt.title(title)
 
         for i in range(0, len(y_labels)):
             y_serie = y_series[i]
             plt.plot(x_serie, y_serie, label=y_labels[i])
+
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+    @staticmethod
+    def plot(title: str, x_serie, x_labels, xlabel: str = '', ylabel: str = '') -> None:
+        plt.figure(figsize=(15, 7))
+        plt.title(title)
+
+        plt.plot(x_serie, label=x_labels)
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -104,7 +157,14 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def scatterPlot(algo: str, y_predict, y_test) -> None:
+    def scatterPlot(x, y) -> None:
+        plt.figure(figsize=(15, 7))
+        plt.grid()
+        plt.scatter(x, y)
+        plt.show()
+
+    @staticmethod
+    def regPlot(algo: str, y_predict, y_test) -> None:
         plt.figure(figsize=(15, 15))
         plt.title('Real vs Predicted - ' + algo)
 
