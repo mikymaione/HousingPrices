@@ -44,14 +44,19 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def plotAreaMeanStd(title: str, x, y, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
+    def plotAreaMeanStd(title: str, x, y, neg: bool, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
         y0 = y[0]
         y1 = y[1]
 
-        y0_mean = -numpy.mean(y0, axis=1)
+        if neg:
+            m = -1
+        else:
+            m = 1
+
+        y0_mean = m * numpy.mean(y0, axis=1)
         y0_std = numpy.std(y0, axis=1)
 
-        y1_mean = -numpy.mean(y1, axis=1)
+        y1_mean = m * numpy.mean(y1, axis=1)
         y1_std = numpy.std(y1, axis=1)
 
         Plotting.plotXYArea(
