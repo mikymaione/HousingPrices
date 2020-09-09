@@ -140,7 +140,7 @@ class Plotting:
         plt.show()
 
     @staticmethod
-    def coeficientPlot(x_train, coef_) -> None:
+    def coeficientPlot(title: str, x_train, coef_) -> None:
         # get ridge coefficient and print them
         coefficient = pandas.DataFrame()
         coefficient["Columns"] = x_train.columns
@@ -148,6 +148,7 @@ class Plotting:
 
         # plotting the coefficient score
         fig, ax = plt.subplots(figsize=(20, 10))
+        ax.set_title(title)
 
         ax.bar(coefficient["Columns"], coefficient['Coefficient Estimate'])
 

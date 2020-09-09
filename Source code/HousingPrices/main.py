@@ -200,30 +200,12 @@ if __name__ == "__main__":
     datas, X, y = DataManager.load_data("cal-housing.csv", False)
     data = datas[0]
 
-    cholesky = Cholesky()
-    lasso = Lasso()
+    cholesky = Cholesky(0.049)
+    cholesky.fit(data.x_train, data.y_train)
+    y_predict_c = cholesky.predict(data.x_test)
+    Plotting.coeficientPlot('Cholesky', data.x_test, cholesky.coef_)
 
-    min_ts = int(X.shape[0] * 0.1)
-    max_ts = int(X.shape[0] * 0.8)
-    step_ts = int(X.shape[0] * 0.05)
-    sizes = range(min_ts, max_ts, step_ts)
-
-    pca = PCA(n_components=5)
-    pca.fit(X)
-
-    X_pca = pca.transform(X)
-
-    # Returns:
-    # -Numbers of training examples that has been used to generate the learning curve. Note that the number of ticks might be less than n_ticks because duplicate entries will be removed;
-    # -Scores on training sets;
-    # -Scores on test set.
-    train_size, train_score, val_score = learning_curve(cholesky, X_pca, y, train_sizes=sizes, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
-
-    Plotting.plotAreaMeanStd(
-        'PCA Linear Regression',
-        sizes,
-        [train_score, val_score],
-        ['Training error', 'CV risk estimate'],
-        ['r', 'g'],
-        'Training size',
-        'MSE')
+    lasso = Lasso(0.049)
+    lasso.fit(data.x_train, data.y_train)
+    y_predict_l = lasso.predict(data.x_test)
+    Plotting.coeficientPlot('Lasso', data.x_test, lasso.coef_)
