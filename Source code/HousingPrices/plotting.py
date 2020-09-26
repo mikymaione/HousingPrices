@@ -72,7 +72,7 @@ class Plotting:
 
     @staticmethod
     def plotXYArea(title: str, x, y, a, b, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
-        plt.figure(figsize=(15, 15))
+        # plt.figure(figsize=(15, 15))
         plt.title(title)
 
         for i in range(len(colors)):
@@ -88,7 +88,7 @@ class Plotting:
 
     @staticmethod
     def plotXY(x_serie, y_series, y_labels: List[str], xlabel: str, ylabel: str, title: str = '') -> None:
-        plt.figure(figsize=(15, 7))
+        # plt.figure(figsize=(15, 7))
         plt.title(title)
 
         for i in range(0, len(y_labels)):
@@ -104,7 +104,7 @@ class Plotting:
 
     @staticmethod
     def plot(title: str, x_serie, x_labels, xlabel: str = '', ylabel: str = '') -> None:
-        plt.figure(figsize=(15, 7))
+        # plt.figure(figsize=(15, 7))
         plt.title(title)
 
         plt.plot(x_serie, label=x_labels)
@@ -152,7 +152,8 @@ class Plotting:
         coefficient['Coefficient Estimate'] = pandas.Series(coef_)
 
         # plotting the coefficient score
-        fig, ax = plt.subplots(figsize=(20, 10))
+        fig, ax = plt.subplots(figsize=(15, 7))
+        # fig, ax = plt.subplots()
         ax.set_title(title)
 
         ax.bar(coefficient["Columns"], coefficient['Coefficient Estimate'])
@@ -164,7 +165,7 @@ class Plotting:
 
     @staticmethod
     def scatterPlot(x, y) -> None:
-        plt.figure(figsize=(15, 7))
+        # plt.figure(figsize=(15, 7))
         plt.grid()
         plt.scatter(x, y)
         plt.show()
