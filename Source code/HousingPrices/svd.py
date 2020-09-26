@@ -12,6 +12,7 @@ from baseRidgeRegression import BaseRidgeRegression
 
 
 class SVD(BaseRidgeRegression):
+    algo = 'SVD'
 
     # https://it.wikipedia.org/wiki/Regolarizzazione_di_Tichonov#Collegamenti_con_la_decomposizione_ai_valori_singolari_e_il_filtro_di_Wiener
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
