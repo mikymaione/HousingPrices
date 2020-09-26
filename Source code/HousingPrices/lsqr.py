@@ -18,7 +18,7 @@ class LSQR(BaseRidgeRegression):
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         # Find the least-squares solution to a large, sparse, linear system of equations.
         # Levenberg–Marquardt algorithm also known as the damped least-squares
-        # [Sᵀ·S + α·diag(Sᵀ·S)]·δ = Sᵀ·[y - w]
+        # [Sᵀ·S + √α·diag(Sᵀ·S)]·α = Sᵀ·[y - w]
         w = scipy.sparse.linalg.lsqr(S, y, damp=self.alpha ** 0.5)
 
         return w[0]
