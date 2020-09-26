@@ -188,7 +188,7 @@ class BaseRidgeRegression(BaseEstimator):
         S, norm_L2 = preprocessing.normalize(X=S, norm="l2", axis=0, copy=False, return_norm=True)
 
         self.coef_ = self.calculateWeights(S, y) / norm_L2
-        self.intercetta = y_wam - S_wam.dot(self.coef_.T)
+        self.intercetta = y_wam - S_wam @ self.coef_.T
 
         # `fit` should always return `self`
         return self
@@ -207,7 +207,7 @@ class BaseRidgeRegression(BaseEstimator):
         X = check_array(X, accept_sparse=True)
         check_is_fitted(self, 'is_fitted_')
 
-        y_predict = numpy.dot(X, self.coef_.T) + self.intercetta
+        y_predict = X @ self.coef_.T + self.intercetta
 
         return y_predict
 
