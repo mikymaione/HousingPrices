@@ -63,7 +63,7 @@ class Plotting:
             title,
             x,
             [y0_mean, y1_mean],
-            [y0_mean - y1_std, y1_mean - y1_std],
+            [y0_mean - y0_std, y1_mean - y1_std],
             [y0_mean + y0_std, y1_mean + y1_std],
             labels,
             colors,
