@@ -29,7 +29,10 @@ class Lasso(BaseRidgeRegression):
                 ρ = Xⱼ.T @ (y - y_pred + β[j] * Xⱼ)
                 ρ = ρ.item()
 
-                β[j] = self.Sα(ρ)
+                if j == 0:
+                    β[j] = ρ
+                else:
+                    β[j] = self.Sα(ρ)
 
         return β.reshape(-1)
 
