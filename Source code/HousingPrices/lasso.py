@@ -18,8 +18,11 @@ class Lasso(BaseRidgeRegression):
     # https://en.wikipedia.org/wiki/Lasso_(statistics)
     # https://xavierbourretsicotte.github.io/lasso_implementation.html
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
+        N = S.shape[0]
         features = S.shape[1]
         β = numpy.ones((features, 1))
+
+        self.λ = self.alpha * N
 
         for n in range(self.num_iters):
             for j in range(features):
@@ -37,9 +40,9 @@ class Lasso(BaseRidgeRegression):
         return β.reshape(-1)
 
     def Sα(self, ρ: float) -> float:
-        if ρ < -self.alpha:
-            return ρ + self.alpha
-        elif ρ > self.alpha:
-            return ρ - self.alpha
+        if ρ < -self.λ:
+            return ρ + self.λ
+        elif ρ > self.λ:
+            return ρ - self.λ
         else:
             return 0
