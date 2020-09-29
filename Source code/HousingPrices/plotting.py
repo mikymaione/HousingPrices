@@ -71,13 +71,36 @@ class Plotting:
             ylabel)
 
     @staticmethod
+    def plotAreaMeanStd1(title: str, x, y, neg: bool, labels: str, colors: str, xlabel: str, ylabel: str) -> None:
+        if neg:
+            m = -1
+        else:
+            m = 1
+
+        y_mean = m * numpy.mean(y, axis=1)
+        y_std = numpy.std(y, axis=1)
+
+        plt.title(title)
+
+        plt.fill_between(x, y_mean - y_std, y_mean + y_std, alpha=0.1, color=colors)
+        plt.plot(x, y_mean, color=colors, label=labels)
+
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+    @staticmethod
     def plotXYArea(title: str, x, y, a, b, labels: List[str], colors: List[str], xlabel: str, ylabel: str) -> None:
         # plt.figure(figsize=(15, 15))
         plt.title(title)
 
         for i in range(len(colors)):
             plt.fill_between(x, a[i], b[i], alpha=0.1, color=colors[i])
-            plt.plot(x, y[i], 'o-', color=colors[i], label=labels[i])
+            plt.plot(x, y[i], color=colors[i], label=labels[i])
+            # plt.plot(x, y[i], 'o-', color=colors[i], label=labels[i])
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
