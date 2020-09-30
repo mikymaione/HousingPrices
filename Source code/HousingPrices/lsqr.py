@@ -13,7 +13,8 @@ from baseRidgeRegression import BaseRidgeRegression
 
 
 class LSQR(BaseRidgeRegression):
-
+    algo = 'LSQR'
+    
     # https://it.wikipedia.org/wiki/Algoritmo_di_Levenberg-Marquardt
     def calculateWeights(self, S: numpy.ndarray, y: numpy.ndarray) -> numpy.ndarray:
         # Find the least-squares solution to a large, sparse, linear system of equations.

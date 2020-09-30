@@ -39,13 +39,13 @@ class BaseRidgeRegression(BaseEstimator):
             outer_cv = KFold(n_splits=5, shuffle=True)
 
             # Non_nested parameter search and scoring
-            clf = GridSearchCV(estimator=self, param_grid=p_grid, cv=inner_cv, n_jobs=-1)
+            clf = GridSearchCV(estimator=self, param_grid=p_grid, cv=inner_cv, n_jobs=1)
             clf.fit(X, y)
 
             self.non_nested_scores[i] = clf.best_score_
 
             # Nested CV with parameter optimization
-            self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=-1)
+            self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=1)
             self.nested_scores[i] = self.nested_score.mean()
 
         self.score_difference = self.non_nested_scores - self.nested_scores
