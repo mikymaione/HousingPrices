@@ -27,6 +27,19 @@ class BaseRidgeRegression(BaseEstimator):
         self.R2 = []
         self.MSE = []
 
+    def nestedCrossValidation(self, X, y, scoring: str) -> None:
+        p_grid = {"alpha": self.alphas}
+
+        # configure the cross-validation procedure
+        cv_inner = KFold(n_splits=5, shuffle=True)
+        cv_outer = KFold(n_splits=self.nested_cross_validation_trials, shuffle=True)
+
+        # define search
+        search = GridSearchCV(estimator=self, param_grid=p_grid, cv=cv_inner, n_jobs=-1, scoring=scoring)
+
+        # execute the nested cross-validation
+        return cross_val_score(search, X, y, cv=cv_outer, n_jobs=-1, scoring=scoring)
+
     def nestedCrossValidationKFold(self, X, y) -> None:
         p_grid = {"alpha": self.alphas}
 
@@ -39,17 +52,17 @@ class BaseRidgeRegression(BaseEstimator):
             outer_cv = KFold(n_splits=5, shuffle=True)
 
             # Non_nested parameter search and scoring
-            clf = GridSearchCV(estimator=self, param_grid=p_grid, cv=inner_cv, n_jobs=1)
+            clf = GridSearchCV(estimator=self, param_grid=p_grid, cv=inner_cv, n_jobs=-1)
             clf.fit(X, y)
 
             self.non_nested_scores[i] = clf.best_score_
 
             # Nested CV with parameter optimization
-            self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=1)
+            self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=-1)
             self.nested_scores[i] = self.nested_score.mean()
 
         self.score_difference = self.non_nested_scores - self.nested_scores
-        print("Average difference of {:6f} with std. dev. of {:6f}.".format(self.score_difference.mean(), self.score_difference.std()))
+        # print("Average difference of {:6f} with std. dev. of {:6f}.".format(self.score_difference.mean(), self.score_difference.std()))
 
     def crossValidationKFold(self, X: pandas.DataFrame, y: pandas.Series) -> None:
         self.R2.clear()
