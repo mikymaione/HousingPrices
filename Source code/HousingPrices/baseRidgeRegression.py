@@ -7,12 +7,13 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import numpy
 import pandas
+from joblib import delayed, Parallel
 
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import KFold, GridSearchCV, cross_val_score, train_test_split, learning_curve
+from sklearn.model_selection import KFold, GridSearchCV, cross_val_score, train_test_split, learning_curve, cross_validate, ParameterGrid, ParameterSampler
 from sklearn.utils import check_X_y, check_array
 from sklearn.utils.validation import check_is_fitted
 
@@ -27,18 +28,51 @@ class BaseRidgeRegression(BaseEstimator):
         self.R2 = []
         self.MSE = []
 
-    def nestedCrossValidation(self, X, y, scoring: str) -> None:
-        p_grid = {"alpha": self.alphas}
+    def nestedCrossValidation(self, X: pandas.DataFrame, y: pandas.Series):
+        EX_CV = KFold(n_splits=self.nested_cross_validation_trials, shuffle=True, random_state=1986)
+        IN_CV = KFold(n_splits=5, shuffle=True)
 
-        # configure the cross-validation procedure
-        cv_inner = KFold(n_splits=5, shuffle=True)
-        cv_outer = KFold(n_splits=self.nested_cross_validation_trials, shuffle=True)
+        outer_scores = []
+        variance = []
+        best_inner_list = []
+        best_inner_alpha = 0
 
-        # define search
-        search = GridSearchCV(estimator=self, param_grid=p_grid, cv=cv_inner, n_jobs=-1, scoring=scoring)
+        for (i, (EX_train_idx, EX_test_idx)) in enumerate(EX_CV.split(X, y)):
+            EX_x_train, EX_x_test = X.iloc[EX_train_idx], X.iloc[EX_test_idx]
+            EX_y_train, EX_y_test = y.iloc[EX_train_idx], y.iloc[EX_test_idx]
 
-        # execute the nested cross-validation
-        return cross_val_score(search, X, y, cv=cv_outer, n_jobs=-1, scoring=scoring)
+            for (j, (IN_train_idx, IN_test_idx)) in enumerate(IN_CV.split(EX_x_train, EX_y_train)):
+                def _fit(x_train: pandas.DataFrame, x_test: pandas.DataFrame, y_train: pandas.Series, y_test: pandas.Series, ɑ: float):
+                    self.alpha = ɑ
+                    self.fit(x_train, y_train)
+                    inner_grid_score = self.score(x_test, y_test)
+                    return inner_grid_score, ɑ
+
+                IN_x_train, IN_x_test = EX_x_train.iloc[IN_train_idx], EX_x_train.iloc[IN_test_idx]
+                IN_y_train, IN_y_test = EX_y_train.iloc[IN_train_idx], EX_y_train.iloc[IN_test_idx]
+
+                IN_result = Parallel(n_jobs=-1)(delayed(_fit)(IN_x_train, IN_x_test, IN_y_train, IN_y_test, ɑ)
+                                                for ɑ in self.alphas)
+
+                IN_result = numpy.array(IN_result)
+                best_idx = numpy.argmax(IN_result[:, 0])
+                best_inner_alpha = IN_result[best_idx][1]
+                best_inner_list.append(IN_result[best_idx])
+
+            self.alpha = best_inner_alpha
+            self.fit(EX_x_train, EX_y_train)
+
+            score, pred = self.score_and_prediction(EX_x_test, EX_y_test)
+            outer_scores.append(score)
+            variance.append(numpy.var(pred))
+
+        best_inner_list = numpy.array(best_inner_list)
+        best_idx = numpy.argmax(best_inner_list[:, 0])
+        best_alpha = best_inner_list[best_idx][1]
+
+        self.best_alpha = best_alpha
+
+        return numpy.array(variance), numpy.array(outer_scores), best_alpha
 
     def nestedCrossValidationKFold(self, X, y) -> None:
         p_grid = {"alpha": self.alphas}
@@ -47,28 +81,24 @@ class BaseRidgeRegression(BaseEstimator):
         self.nested_scores = numpy.zeros(self.nested_cross_validation_trials)
 
         for i in range(self.nested_cross_validation_trials):
-            # Choose cross-validation techniques for the inner and outer loops, independently of the dataset
             inner_cv = KFold(n_splits=5, shuffle=True)
-            outer_cv = KFold(n_splits=5, shuffle=True)
+            outer_cv = KFold(n_splits=5, shuffle=True, random_state=1986)
 
-            # Non_nested parameter search and scoring
             clf = GridSearchCV(estimator=self, param_grid=p_grid, cv=inner_cv, n_jobs=-1)
             clf.fit(X, y)
 
             self.non_nested_scores[i] = clf.best_score_
 
-            # Nested CV with parameter optimization
             self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=-1)
             self.nested_scores[i] = self.nested_score.mean()
 
         self.score_difference = self.non_nested_scores - self.nested_scores
-        # print("Average difference of {:6f} with std. dev. of {:6f}.".format(self.score_difference.mean(), self.score_difference.std()))
 
     def crossValidationKFold(self, X: pandas.DataFrame, y: pandas.Series) -> None:
         self.R2.clear()
         self.MSE.clear()
 
-        kf = KFold(n_splits=5, shuffle=True)
+        kf = KFold(n_splits=5, shuffle=True, random_state=1986)
 
         for ɑ in self.alphas:
             k_scores = []
@@ -125,7 +155,7 @@ class BaseRidgeRegression(BaseEstimator):
         coef_list = []
 
         for s in sizes:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=s, shuffle=True)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=s, shuffle=True, random_state=1986)
             self.fit(X_train, y_train)
             coef_list.append(self.coef_)
 
@@ -163,10 +193,16 @@ class BaseRidgeRegression(BaseEstimator):
 
         return R
 
-    def score(self, x_test: pandas.DataFrame, y_test: pandas.Series) -> numpy.float64:
+    def score_and_prediction(self, x_test: pandas.DataFrame, y_test: pandas.Series):
         y_predict = self.predict(x_test)
+        score = r2_score(y_test, y_predict)
 
-        return r2_score(y_test, y_predict)
+        return score, y_predict
+
+    def score(self, x_test: pandas.DataFrame, y_test: pandas.Series) -> numpy.float64:
+        score, y_predict = self.score_and_prediction(x_test, y_test)
+
+        return score
 
     def fit(self, X, y):
         """A reference implementation of a fitting function.
