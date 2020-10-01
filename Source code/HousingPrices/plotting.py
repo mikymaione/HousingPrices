@@ -26,7 +26,7 @@ class Plotting:
         non_nested_scores_line, = plt.plot(non_nested_scores)
         nested_line, = plt.plot(nested_scores)
 
-        plt.ylabel("score")
+        plt.ylabel("R²")
         plt.grid()
         plt.legend([non_nested_scores_line, nested_line], ["Non-Nested CV", "Nested CV"])
         plt.title("Non-Nested and Nested Cross Validation")
