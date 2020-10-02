@@ -175,13 +175,14 @@ class Plotting:
         coefficient['Coefficient Estimate'] = pandas.Series(coef_)
 
         # plotting the coefficient score
-        fig, ax = plt.subplots(figsize=(15, 7))
-        # fig, ax = plt.subplots()
+        # fig, ax = plt.subplots(figsize=(15, 7))
+        fig, ax = plt.subplots()
+
         ax.set_title(title)
 
-        ax.bar(coefficient["Columns"], coefficient['Coefficient Estimate'])
+        ax.barh(coefficient["Columns"], coefficient['Coefficient Estimate'])
 
-        ax.spines['bottom'].set_position('zero')
+        # ax.spines['right'].set_position('zero')
 
         plt.grid()
         plt.show()
