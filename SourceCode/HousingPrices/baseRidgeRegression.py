@@ -77,6 +77,9 @@ class BaseRidgeRegression(BaseEstimator):
     def nestedCrossValidationKFold(self, X, y) -> None:
         p_grid = {"alpha": self.alphas}
 
+        self.best_alphas_NestedCV = []
+        self.best_alphas_NonNestedCV = []
+
         self.non_nested_scores = numpy.zeros(self.nested_cross_validation_trials)
         self.nested_scores = numpy.zeros(self.nested_cross_validation_trials)
 
@@ -88,11 +91,25 @@ class BaseRidgeRegression(BaseEstimator):
             clf.fit(X, y)
 
             self.non_nested_scores[i] = clf.best_score_
+            self.best_alphas_NonNestedCV.append((clf.best_params_['alpha'], clf.best_score_))
 
-            self.nested_score = cross_val_score(clf, X=X, y=y, cv=outer_cv, n_jobs=-1)
-            self.nested_scores[i] = self.nested_score.mean()
+            scores = cross_validate(clf, X=X, y=y, cv=outer_cv, return_estimator=True, n_jobs=-1)
+            test_score = scores['test_score']
+            j = numpy.argmax(test_score)
+            self.best_alphas_NestedCV.append((scores['estimator'][j].best_params_['alpha'], test_score[j]))
+
+            self.nested_scores[i] = test_score.mean()
 
         self.score_difference = self.non_nested_scores - self.nested_scores
+
+        self.best_alphas_NestedCV = numpy.array(self.best_alphas_NestedCV)
+        self.best_alphas_NonNestedCV = numpy.array(self.best_alphas_NonNestedCV)
+
+        j = numpy.argmax(self.best_alphas_NestedCV[:, 1])
+        self.best_alpha_NestedCV = self.best_alphas_NestedCV[j, 0]
+
+        j = numpy.argmax(self.best_alphas_NonNestedCV[:, 1])
+        self.best_alpha_NonNestedCV = self.best_alphas_NonNestedCV[j, 0]
 
     def crossValidationKFold(self, X: pandas.DataFrame, y: pandas.Series) -> None:
         self.R2.clear()
